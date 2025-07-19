@@ -1,49 +1,48 @@
 # Weather MCP Server
 
-echo '{"id":2,"method":"tools/list","params":{}}' | bb -cp /Users/daniel/Workspace/sandbox/claude/weather-mcp/src -m server
+A minimal MCP (Model Context Protocol) server that provides fake weather information.
 
-echo '{"id":3,"method":"tools/call","params":{"name":"get_weather","arguments":{"location":"Paris"}}}' | bb -cp /Users/daniel/Workspace/sandbox/claude/weather-mcp/src -m server
+## Run continuously
 
-echo '{"id":1,"method":"initialize","params":{}}' | bb -cp /Users/daniel/Workspace/sandbox/claude/weather-mcp/src -m server
+Either
 
+```
+$ /Users/daniel/Workspace/eighttrigrams/tracker-mcp/run.sh
+```
 
+or
 
-A minimal MCP (Model Context Protocol) server built with Babashka that provides fake weather information.
+```
+$ cd /Users/daniel/Workspace/eighttrigrams/tracker-mcp
+$ clj -M:run
+```
+
+and then feed it lines like
+
+```json
+{"id":1,"method":"initialize","params":{}}
+```
+
+and it will respond to that on pressing **enter**. 
+
+That is, the server reads JSON-RPC requests from stdin and writes responses to stdout.
+
+## One-shot usage examples
+
+```sh
+$ echo '{"id":2,"method":"tools/list","params":{}}' | /Users/daniel/Workspace/eighttrigrams/tracker-mcp/run.sh
+$ echo '{"id":3,"method":"tools/call","params":{"name":"get_weather","arguments":{"location":"Paris"}}}' | /Users/daniel/Workspace/eighttrigrams/tracker-mcp/run.sh
+$ echo '{"id":1,"method":"initialize","params":{}}' | /Users/daniel/Workspace/eighttrigrams/tracker-mcp/run.sh
+```
 
 ## Features
 
 - Implements MCP protocol version 2024-11-05
 - Provides a `get_weather` tool that returns one of 5 predefined weather descriptions
-- Built with Babashka for fast startup and easy deployment
-
-## Usage
-
-Start the server:
-```bash
-bb server
-```
-
-The server reads JSON-RPC requests from stdin and writes responses to stdout.
-
-## Testing
-
-You can test the server manually by sending JSON-RPC requests:
-
-```bash
-echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | bb server
-echo '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' | bb server  
-echo '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"get_weather","arguments":{"location":"San Francisco"}}}' | bb server
-```
 
 ## Adding to Claude Code
 
-This works for Babashka
-
-```bash
-$ claude mcp add weather -- bb -cp /Users/daniel/Workspace/eighttrigrams/tracker-mcp/src -m server
-```
-
-This works for Clojure
+Run
 
 ```sh
 $ claude mcp add weather3 -- sh /Users/daniel/Workspace/eighttrigrams/tracker-mcp/run.sh
