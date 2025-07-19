@@ -63,6 +63,6 @@
                                        :id nil}))
         (flush)))))
 
-(defn -main []
+(defn -main [& _args]
   (doseq [line (line-seq (java.io.BufferedReader. *in*))]
     (process-line line)))

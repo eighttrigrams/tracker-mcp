@@ -37,8 +37,14 @@ echo '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"get_weathe
 
 ## Adding to Claude Code
 
-This works
+This works for Babashka
 
 ```bash
 $ claude mcp add weather -- bb -cp /Users/daniel/Workspace/eighttrigrams/tracker-mcp/src -m server
+```
+
+This works for Clojure
+
+```sh
+$ claude mcp add weather3 -- sh /Users/daniel/Workspace/eighttrigrams/tracker-mcp/run.sh
 ```
