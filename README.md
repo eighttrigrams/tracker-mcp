@@ -1,20 +1,12 @@
 # Weather MCP Server
 
-this works
-claude mcp add weather1 -- bb -cp /Users/daniel/Workspace/sandbox/claude/weather-mcp/src -m server
-
----
-
-
 echo '{"id":2,"method":"tools/list","params":{}}' | bb -cp /Users/daniel/Workspace/sandbox/claude/weather-mcp/src -m server
 
 echo '{"id":3,"method":"tools/call","params":{"name":"get_weather","arguments":{"location":"Paris"}}}' | bb -cp /Users/daniel/Workspace/sandbox/claude/weather-mcp/src -m server
 
 echo '{"id":1,"method":"initialize","params":{}}' | bb -cp /Users/daniel/Workspace/sandbox/claude/weather-mcp/src -m server
 
-claude mcp add weather -- bb -cp /Users/daniel/Workspace/sandbox/claude/weather-mcp/src -m server
 
-claude --model claude-sonnet-4-20250514
 
 A minimal MCP (Model Context Protocol) server built with Babashka that provides fake weather information.
 
@@ -41,4 +33,12 @@ You can test the server manually by sending JSON-RPC requests:
 echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | bb server
 echo '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' | bb server  
 echo '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"get_weather","arguments":{"location":"San Francisco"}}}' | bb server
+```
+
+## Adding to Claude Code
+
+This works
+
+```bash
+$ claude mcp add weather -- bb -cp /Users/daniel/Workspace/sandbox/claude/weather-mcp/src -m server
 ```
