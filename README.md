@@ -40,5 +40,5 @@ echo '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"get_weathe
 This works
 
 ```bash
-$ claude mcp add weather -- bb -cp /Users/daniel/Workspace/sandbox/claude/weather-mcp/src -m server
+$ claude mcp add weather -- bb -cp /Users/daniel/Workspace/eighttrigrams/tracker-mcp/src -m server
 ```
