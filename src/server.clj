@@ -39,18 +39,35 @@
                         :selected-context 
                             {:type "string"
                              :description "an id number to narrow down the search results to items related to that context."}}
-           :required   ["q"]}}]}}
+           :required   ["q"]}}
+           {:name        "get_item"
+          :description "Asks Tracker about a single item, and that means, in contrast
+                        to listing items with for example get_issues, that the description is included,
+                        Which is what we are often also interested in, once we identified the specific 
+                        item we are after."
+                        
+          :inputSchema
+          {:type       "object"
+           :properties {:id {:type "string"
+                            :description "the issue's id, as the issues returned from get_issues always include."}}
+           :required   ["id"]}}]}}
       
       (= method "tools/call")
       (let [tool-name (get-in params [:name])
             arguments (get-in params [:arguments])]
-        (if (= tool-name "get_issues")
+        (cond
+          (= tool-name "get_issues")
           {:jsonrpc "2.0"
-           :result {:content [{:type "text"
-                               :text (json/generate-string (tools/get-issues arguments))}]}}
+           :result  {:content [{:type "text"
+                                :text (json/generate-string (tools/get-issues arguments))}]}}
+          (= tool-name "get_item")
           {:jsonrpc "2.0"
-           :error {:code -32601
-                  :message "Unknown tool"}}))
+           :result  {:content [{:type "text"
+                                :text (json/generate-string (tools/get-item arguments))}]}}
+          :else
+          {:jsonrpc "2.0"
+           :error   {:code    -32601
+                     :message "Unknown tool"}}))
       
       :else
       {:jsonrpc "2.0"
