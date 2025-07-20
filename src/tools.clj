@@ -2,7 +2,8 @@
   (:require [clojure.edn :as edn]
             [et.vp.ds.search :as search]
             [clojure.pprint :as pprint]
-            tools))
+            tools
+            [cheshire.core :as json]))
 
 (defonce db (:db (edn/read-string (slurp "../tracker/config.edn"))))
 
@@ -13,9 +14,11 @@
    "A mystical fog has rolled in, creating an enchanting atmosphere throughout the valley."
    "The air is crisp and clear, with snowflakes dancing gracefully in the winter sunlight."])
 
-(defn get-weather [_arguments]
-  #_(:location arguments)
-  (rand-nth weather-responses))
+(defn get-issues [{:keys [q selected-context] :as _arguments}]
+  (search/search-issues db (merge {:q q :limit 10}
+                                  (when selected-context {:selected-context {:id selected-context}}))))
 
 (comment
-  (pprint/pprint (search/search-contexts db {:q "YouTube"})))
+  (require '[cheshire.core :as json])
+  (json/generate-string (get-issues {:q "YouTube"}))
+  (pprint/pprint (get-issues {:q "YouTube"})))

@@ -31,19 +31,19 @@ That is, the server reads JSON-RPC requests from stdin and writes responses to s
 
 ```sh
 $ echo '{"id":2,"method":"tools/list","params":{}}' | /Users/daniel/Workspace/eighttrigrams/tracker-mcp/run.sh
-$ echo '{"id":3,"method":"tools/call","params":{"name":"get_weather","arguments":{"location":"Paris"}}}' | /Users/daniel/Workspace/eighttrigrams/tracker-mcp/run.sh
+$ echo '{"id":3,"method":"tools/call","params":{"name":"get_issues","arguments":{"q":"Paris"}}}' | /Users/daniel/Workspace/eighttrigrams/tracker-mcp/run.sh
 $ echo '{"id":1,"method":"initialize","params":{}}' | /Users/daniel/Workspace/eighttrigrams/tracker-mcp/run.sh
 ```
 
 ## Features
 
 - Implements MCP protocol version 2024-11-05
-- Provides a `get_weather` tool that returns one of 5 predefined weather descriptions
+- Provides a `get_issues` tool that returns up to 10 search hits at a time
 
 ## Adding to Claude Code
 
 Run
 
 ```sh
-$ claude mcp add weather3 -- sh /Users/daniel/Workspace/eighttrigrams/tracker-mcp/run.sh
+$ claude mcp add tracker -- sh /Users/daniel/Workspace/eighttrigrams/tracker-mcp/run.sh
 ```
