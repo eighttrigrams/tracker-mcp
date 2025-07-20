@@ -1,16 +1,6 @@
 (ns server
-  (:require [cheshire.core :as json]
-            [clojure.java.io :as io]))
-
-(def weather-responses
-  ["The weather is delightfully sunny with a gentle breeze rustling through the leaves."
-   "It's a perfectly dreary day with soft rain tapping against the window panes."
-   "The sky is painted with fluffy white clouds drifting lazily across a brilliant blue canvas."
-   "A mystical fog has rolled in, creating an enchanting atmosphere throughout the valley."
-   "The air is crisp and clear, with snowflakes dancing gracefully in the winter sunlight."])
-
-(defn get-weather [location]
-  (rand-nth weather-responses))
+  (:require [cheshire.core :as json] 
+            tools))
 
 (defn handle-request [request]
   (let [method (:method request)
@@ -29,7 +19,7 @@
                         :description "Get weather information for a location"
                         :inputSchema {:type "object"
                                     :properties {:location {:type "string"
-                                                          :description "The location to get weather for"}}
+                                                            :description "The location to get weather for"}}
                                     :required ["location"]}}]}}
       
       (= method "tools/call")
@@ -38,15 +28,15 @@
         (if (= tool-name "get_weather")
           {:jsonrpc "2.0"
            :result {:content [{:type "text"
-                              :text (get-weather (:location arguments))}]}}
+                               :text (tools/get-weather arguments)}]}}
           {:jsonrpc "2.0"
            :error {:code -32601
                   :message "Unknown tool"}}))
       
       :else
       {:jsonrpc "2.0"
-       :error {:code -32601
-              :message "Unknown method"}})))
+       :error {:code    -32601
+               :message "Unknown method"}})))
 
 (defn process-line [line]
   (when-not (empty? line)
