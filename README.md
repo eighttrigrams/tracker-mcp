@@ -33,6 +33,9 @@ That is, the server reads JSON-RPC requests from stdin and writes responses to s
 $ echo '{"id":2,"method":"tools/list","params":{}}' | /Users/daniel/Workspace/eighttrigrams/tracker-mcp/run.sh
 $ echo '{"id":3,"method":"tools/call","params":{"name":"get_issues","arguments":{"q":"Paris"}}}' | /Users/daniel/Workspace/eighttrigrams/tracker-mcp/run.sh
 $ echo '{"id":1,"method":"initialize","params":{}}' | /Users/daniel/Workspace/eighttrigrams/tracker-mcp/run.sh
+
+
+{"id":3,"method":"tools/call","params":{"name":"get_related_items","arguments":{"selected-context-item-id":"10935", "q":"", "secondary-contexts-items-ids":["11041"]}}}
 ```
 
 ## Features

@@ -42,6 +42,18 @@
                                                  :description "with a value \"true\" on this parameter, it lists only items marked as contexts. These are more often better entrypoints into a search consisting of possibly
                                                                 multiple tool calls with follow ups via get_related_items than a broader search without that parameter would be. Prefer that to get the broad categories of a search right first."}}
                   :required   ["q"]}}
+   #_#_:get-aggregated-contexts
+   {:name "get_aggregated_contexts"
+    :description "When you do a get_related_items search, you are operating within a given
+                  context. And you will get a list of items associated with that context.
+                  But these items are also associated to other contexts, a listing of which you
+                  get by querying get_aggregated_contexts. You can use select ids of these
+                  to filter in a subsequent get_related_items query"
+    :inputSchema {:type       "object"
+                  :properties {:selected-context-item-id 
+                               {:type        "string"
+                                :description "an id number to narrow down the search results to items related to that context."}}
+                  :required   ["selected-context-item-id"]}}
    :get-related-items
    {:name        "get_related_items"
     :description "Asks Tracker about related items to a given context item and lists 
@@ -55,8 +67,14 @@
                                           the thing we search for is the top search result.
                                           
                                           However, when a selected-context is given, you might want to give an empty query string to see all items available and related to a given context."}
-                               :selected-context-item-id {:type        "string"
-                                                  :description "an id number to narrow down the search results to items related to that context."}}
+                               :selected-context-item-id 
+                                 {:type        "string"
+                                  :description "an id number to narrow down the search results to items related to that context."}
+                               #_#_:secondary-contexts-items-ids
+                               {:type "array"
+                                :items {:type "string"}
+                                :description "When doing a get_related_items query that is narrowed down
+                                              by additional contexts, only items are shown which are also part of these other contexts."}}
                   :required   ["q" "selected-context-item-id"]}}
    :get-item   {:name        "get_item"
                 :description "Asks Tracker about a single item, and that means, in contrast
@@ -68,7 +86,6 @@
                         more often than not also check for its related item, ussing its id,
                               using get_related_items and the selected-context-item-id parameter.
                               "
-                
                 :inputSchema {:type       "object"
                               :properties {:id {:type        "string"
                                                 :description "the item's id, as the issues returned from get_items and get_related_items always include."}}
@@ -82,8 +99,15 @@
     (search/search-contexts db (merge {:limit 10}))
     (search/search-issues db q (merge {:limit 10}))))
 
-(defn get-related-items [{:keys [q selected-context-item-id] :as _arguments}]
-  (search/search-issues db q {:selected-context {:id selected-context-item-id}}))
+(defn get-related-items [{:keys [q selected-context-item-id :secondary-contexts-items-ids] :as _arguments}]
+  (search/search-issues 
+   db
+   q 
+   {:selected-context {:id   selected-context-item-id
+                       :data {:views {:current {:secondary-contexts secondary-contexts-items-ids}}}}}))
+
+#_(defn get-aggregated-contexts [{:keys [selected-context-item-id] :as _arguments}]
+  (search/fetch-aggregated-contexts db {:selected-context {:id selected-context-item-id}}))
 
 (defn get-item [{:keys [id] :as _arguments}]
   (ds/get-item db 
@@ -94,11 +118,13 @@
   (case name
     "get_items" get-items
     "get_related_items" get-related-items
+    ;; "get_aggregated_contexts" get-aggregated-contexts
     "get_item" get-item
     nil))
 
 (comment
   (require '[cheshire.core :as json])
+  #_(get-aggregated-contexts {:selected-context-item-id 10935})
   (search/search-contexts db "")
   (json/generate-string (get-items {:q "YouTube"}))
   (pprint/pprint (get-items {:q "YouTube"})))
