@@ -79,15 +79,16 @@
   (when (not (or (= "true" only-contexts) (nil? only-contexts))) 
     (throw (IllegalArgumentException. "only contexts should either be \"true\" or nil/null (omit the parameter/argument entirely when it should say anything other than true)")))
   (if (= "true" only-contexts)
-    (search/search-contexts db (merge {:q q :limit 10}))
-    (search/search-issues db (merge {:q q :limit 10}))))
+    (search/search-contexts db (merge {:limit 10}))
+    (search/search-issues db q (merge {:limit 10}))))
 
 (defn get-related-items [{:keys [q selected-context-item-id] :as _arguments}]
-  (search/search-issues db (merge {:q q}
-                                  {:selected-context {:id selected-context-item-id}})))
+  (search/search-issues db q {:selected-context {:id selected-context-item-id}}))
 
 (defn get-item [{:keys [id] :as _arguments}]
-  (ds/get-item db {:id id}))
+  (ds/get-item db 
+               ;; TODO make the & arg-map thing to pass in :id id without specifying map, then check whether arg is id, or title, to replace get-by-title
+               {:id id}))
 
 (defn map-tool [name]
   (case name
