@@ -17,7 +17,8 @@
 (def tools-list 
   {:get-items
    {:name        "get_items"
-    :description "Asks Tracker about all available items and lists 
+    :description 
+    "Asks Tracker about all available items and lists 
                   them in the order
                   most recently touched first (where touched can mean a 
                   modification or just having looked at it).
@@ -31,9 +32,20 @@
                         
                         Now it gets even better. Once you know the \"id\" 
                         of a certain item you can find out which other items 
-                        it is related to by supplying a selected-context id.
+                        it is related to by supplying a selected-context-id.
                         The search results will then be confined to items listed 
-                        as related to that context (which is also an item)."
+                        as related to that context (which is also an item).
+     
+     Also use the q parameter more for finding generic categories than for anything too specific
+     since tracker does not always contain everything in titles. Other strategies are better
+     for example when searching for Quotes on the Scientific Method, try to find the context
+                  for Quotes and the Context for Scientic Method, and then try
+                  to make an intersection search by using get-related-items
+                  with the arguments selected-context-id (passing the id for Scientic Method)
+                  and secondary-contexts-items-ids (passing an array with the only item being 
+                  the id of Quotes).
+     
+     "
     :inputSchema {:type       "object"
                   :properties {:q                {:type        "string"
                                                   :description "Query string. Obviously, when trying to find anything, we need to narrow down the search result, ideally such that 
@@ -59,21 +71,35 @@
     :description "Asks Tracker about related items to a given context item and lists 
                   them in the order
                   most recently touched first (where touched can mean a 
-                  modification or just having looked at it)."
+                  modification or just having looked at it).
+                  
+                  If you can, prefer intersection search using the secondary_contexts_items_ids
+                  argument, thereby narrowing down results with multiple context ids, over using
+                  all to specific search strings provided under the q parameter"
     
     :inputSchema {:type       "object"
-                  :properties {:q                {:type        "string"
-                                                  :description "Query string. Obviously, when trying to find anything, we need to narrow down the search result, ideally such that 
+                  :properties {:q {:type        "string"
+                                   :description "Query string. 
+                                                 
+                                                 Before I describe this argument, note that it is often preferential to
+                                                 pre-filter items by using intersection search by passing secondary-contexts-items-ids
+                                                 rather than using an actual search term for q.
+                                                 
+                                                 Obviously, when trying to find anything, we need to narrow down the search result, ideally such that 
                                           the thing we search for is the top search result.
-                                          
-                                          However, when a selected-context is given, you might want to give an empty query string to see all items available and related to a given context."}
+                                                 
+                                          However, when a selected-context is given, you might want to give an empty query string to see all items available and related to a given context.
+                                                 
+                                                 An even better strategy within Tracker to filter for good results is to specify secondary-contexts-items-ids to 
+                                                 search in intersections of contexts. This is often better to use query strings."}
                                :selected-context-item-id 
                                  {:type        "string"
                                   :description "an id number to narrow down the search results to items related to that context."}
-                               #_#_:secondary-contexts-items-ids
+                               :secondary-contexts-items-ids
                                {:type "array"
                                 :items {:type "string"}
-                                :description "When doing a get_related_items query that is narrowed down
+                                :description "A definitive success strategy in Tracker:
+                                              When doing a get_related_items query that is narrowed down
                                               by additional contexts, only items are shown which are also part of these other contexts."}}
                   :required   ["q" "selected-context-item-id"]}}
    :get-item   {:name        "get_item"
