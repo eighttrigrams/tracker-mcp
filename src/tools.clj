@@ -109,13 +109,18 @@
                                                  search in intersections of contexts. This is often better to use query strings."}
                                :selected-context-item-id 
                                  {:type        "string"
-                                  :description "an id number to narrow down the search results to items related to that context."}
+                                  :description "an id number to narrow down the search results to items related to that context.
+                                                when doing intersection searches, use this id for the narrowest/most specific of the contexts."}
                                :secondary-contexts-items-ids
                                {:type "array"
                                 :items {:type "string"}
                                 :description "A definitive success strategy in Tracker:
                                               When doing a get_related_items query that is narrowed down
-                                              by additional contexts, only items are shown which are also part of these other contexts."}}
+                                              by additional contexts, only items are shown which are also part of these other contexts.
+                                              
+                                              When doing intersection searches, make broader and more generic categories  
+                                              be deployed via secondary-contexts-items-ids and reserve selected-context-item-id 
+                                              for the narrowest of the contexts."}}
                   :required   ["q" "selected-context-item-id"]}}
    :get-item   {:name        "get_item"
                 :description "Asks Tracker about a single item, and that means, in contrast
