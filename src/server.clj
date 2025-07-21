@@ -1,6 +1,7 @@
 (ns server
   (:require [cheshire.core :as json] 
-            tools))
+            tools
+            [clojure.edn :as edn]))
 
 (defn handle-request [request]
   (let [method (:method request)
@@ -20,8 +21,12 @@
              arguments (get-in params [:arguments])
              f (tools/map-tool tool-name)]
          (if f 
-           {:result  {:content [{:type "text"
-                                 :text (json/generate-string (f arguments))}]}} 
+           (let [result (try (f arguments)
+                         (catch IllegalArgumentException e
+                           {:error {:code -32602
+                                    :message (.getMessage e)}}))]
+             {:result  {:content [{:type "text"
+                                   :text (json/generate-string result)}]}}) 
            {:error   {:code    -32601
                       :message "Unknown tool"}}))
        :else
