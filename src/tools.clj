@@ -84,7 +84,7 @@
 
 (defn get-related-items [{:keys [q selected-context-item-id] :as _arguments}]
   (search/search-issues db (merge {:q q}
-                                  (when selected-context-item-id {:selected-context {:id selected-context-item-id}}))))
+                                  {:selected-context {:id selected-context-item-id}})))
 
 (defn get-item [{:keys [id] :as _arguments}]
   (ds/get-item db {:id id}))
