@@ -18,7 +18,11 @@
   {:get-items
    {:name        "get_items"
     :description 
-    "Asks Tracker about all available items and lists 
+    "When I am in Claude and ask what I think about this or that or 
+     anything relating to my memory (as the current user using Claude and its tools)
+     I am actually making a reference to Tracker/the Tracker system.
+     
+     Asks Tracker about all available items and lists 
                   them in the order
                   most recently touched first (where touched can mean a 
                   modification or just having looked at it).
@@ -75,7 +79,18 @@
                   
                   If you can, prefer intersection search using the secondary_contexts_items_ids
                   argument, thereby narrowing down results with multiple context ids, over using
-                  all to specific search strings provided under the q parameter"
+                  all to specific search strings provided under the q parameter.
+                  
+                  If you can get away with it, then use multiple ids in secondary_contexts_items_ids
+                  to make the search even narrower defined. 
+
+                  When doing that, make the broader categories/contexts ids be provided
+                  in secondary_contexts_items_ids and the less specific id provided as
+                  selected-context-item-id. For example, Quotes on the Second World War ->
+                  Quotes is the broader category, so the quotes id is provided via
+                  secondary_contexts_items_ids and the Second World War id is provided via
+                  selected-context-item-id.
+                  "
     
     :inputSchema {:type       "object"
                   :properties {:q {:type        "string"
@@ -122,15 +137,17 @@
   (when (not (or (= "true" only-contexts) (nil? only-contexts))) 
     (throw (IllegalArgumentException. "only contexts should either be \"true\" or nil/null (omit the parameter/argument entirely when it should say anything other than true)")))
   (if (= "true" only-contexts)
-    (search/search-contexts db (merge {:limit 10}))
-    (search/search-issues db q (merge {:limit 10}))))
+    (search/search-contexts db (merge {:limit 10 :force-limit? true}))
+    (search/search-issues db q (merge {:limit 10 :force-limit? true}))))
 
 (defn get-related-items [{:keys [q selected-context-item-id :secondary-contexts-items-ids] :as _arguments}]
   (search/search-issues 
    db
    q 
    {:selected-context {:id   selected-context-item-id
-                       :data {:views {:current {:secondary-contexts secondary-contexts-items-ids}}}}}))
+                       :data {:views {:current {:secondary-contexts secondary-contexts-items-ids}}}}
+    :limit 10
+    :force-limit? true}))
 
 #_(defn get-aggregated-contexts [{:keys [selected-context-item-id] :as _arguments}]
   (search/fetch-aggregated-contexts db {:selected-context {:id selected-context-item-id}}))
