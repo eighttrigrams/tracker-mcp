@@ -21,55 +21,56 @@
     "When I am in Claude and ask what I think about this or that or 
      anything relating to my memory (as the current user using Claude and its tools)
      I am actually making a reference to Tracker/the Tracker system.
-     
-     Asks Tracker about all available items and lists 
-                  them in the order
-                  most recently touched first (where touched can mean a 
-                  modification or just having looked at it).
 
-                  Use the only-contexts \"true\" option as a default when starting searches. Reason:
-                  When starting searches (spanning possibly multiple tool calls), it is good
-                  to find items which are marked as \"contexts\" before following chains
-                  via \"get-related-items\" etc. Use the \"only-contexts\" argument of the get_items tool for that. 
-                  When you don't find what you search for, instantly, instead of omitting the argument as true here,
-                  try first a couple of searches with that argument left as true, but different search terms.
-                        
-                        Now it gets even better. Once you know the \"id\" 
-                        of a certain item you can find out which other items 
-                        it is related to by supplying a selected-context-id.
-                        The search results will then be confined to items listed 
-                        as related to that context (which is also an item).
+     Tracker's main features include
+     - intersection search.
+
+     @tool get_items
+     <SEARCH STRATEGY>
+     <DO>
+     Search in Tracker system usually involve multiple tool calls to various tools
+     to finally arrive at good search results. The first step in such a search-chain is
+     always via get_items, and specifically the first step is always to find a couple
+     of suitable contexts (items which stand for categories under which many other items
+     are grouped), which is done using the only_contexts argument set to \"true\".
+
+     In general search results in tracker yield items (which may or may not be considered context items, see property is_context),
+     but without description. So at any point, if you have an item in tracker,
+     to fetch its description to get more insight to inform further searches, 
+     use the get_item tool, to get the item with its description.
+     </DO>
+     <DONT>
+     Instead of for example searching for \"World War II videos\", in Tracker,
+     always search for \"World War II\" and \"Videos\" contexts. Longer chains
+     of words in searches are indicators that the purpose of Tracker as an intersection
+     search based search system is defeated, or its potential not fully used during search.
+     </DONT>
+     </SEARCH STRATEGY>
+
+     Result lists are in order of most recently touched first (where touched can mean a 
+     modification or just having looked at it). This is designed such on purpose, because
+     Tracker represeents my personal memory and more recently touched items are literally
+     \"on the top of my mind\". Note that this also means that items first listed 
+     should be understood to have a higher weight/relevance.
+
+     Sometimes searches for specific search terms (via the q argument) and without
+     the only_contexts argument make sense, but instead of lets say searching 
+     Quotes for the topic of World War II, in Tracker the recommended strategy is
+     searching for a Quotes context and then a World War II context,
+     and then continuing with intersection searches with the get_related_items tool.
      
-     Also use the q parameter more for finding generic categories than for anything too specific
-     since tracker does not always contain everything in titles. Other strategies are better
-     for example when searching for Quotes on the Scientific Method, try to find the context
-                  for Quotes and the Context for Scientic Method, and then try
-                  to make an intersection search by using get-related-items
-                  with the arguments selected-context-id (passing the id for Scientic Method)
-                  and secondary-contexts-items-ids (passing an array with the only item being 
-                  the id of Quotes).
-     
-     "
+     One other important thing, while context items are meant to act as containers
+     and entry point for searches, EVERY item has the same property that you
+     can get its description via get_item, and find items related to it via
+     get_related_items."
     :inputSchema {:type       "object"
                   :properties {:q                {:type        "string"
                                                   :description "Query string. Obviously, when trying to find anything, we need to narrow down the search result, ideally such that 
                                           the thing we search for is the top search result. Note that normally we limit the results to 10, so you might not even see any more."}
-                               :only-contexts   {:type        "string" 
+                               :only_contexts   {:type        "string" 
                                                  :description "with a value \"true\" on this parameter, it lists only items marked as contexts. These are more often better entrypoints into a search consisting of possibly
                                                                 multiple tool calls with follow ups via get_related_items than a broader search without that parameter would be. Prefer that to get the broad categories of a search right first."}}
                   :required   ["q"]}}
-   #_#_:get-aggregated-contexts
-   {:name "get_aggregated_contexts"
-    :description "When you do a get_related_items search, you are operating within a given
-                  context. And you will get a list of items associated with that context.
-                  But these items are also associated to other contexts, a listing of which you
-                  get by querying get_aggregated_contexts. You can use select ids of these
-                  to filter in a subsequent get_related_items query"
-    :inputSchema {:type       "object"
-                  :properties {:selected-context-item-id 
-                               {:type        "string"
-                                :description "an id number to narrow down the search results to items related to that context."}}
-                  :required   ["selected-context-item-id"]}}
    :get-related-items
    {:name        "get_related_items"
     :description "Asks Tracker about related items to a given context item and lists 
@@ -77,41 +78,63 @@
                   most recently touched first (where touched can mean a 
                   modification or just having looked at it).
                   
-                  If you can, prefer intersection search using the secondary_contexts_items_ids
+                  <SEARCH STRATEGY>
+                  <DO>
+                  Whenever you can, **prefer** intersection search using the secondary_contexts_items_ids
                   argument, thereby narrowing down results with multiple context ids, over using
                   all to specific search strings provided under the q parameter.
                   
                   If you can get away with it, then use multiple ids in secondary_contexts_items_ids
                   to make the search even narrower defined. 
-
+                  
                   When doing that, make the broader categories/contexts ids be provided
                   in secondary_contexts_items_ids and the less specific id provided as
                   selected-context-item-id. For example, Quotes on the Second World War ->
                   Quotes is the broader category, so the quotes id is provided via
                   secondary_contexts_items_ids and the Second World War id is provided via
-                  selected-context-item-id.
+                  selected_context_item_id.
+                  </DO>
+                  <DONT>
+                  Avoid doing searches without at least trying intersections
+                  using secondary_contexts_items_ids argument.
+                  </DONT>
+                  </SEARCH STRATEGY>
                   "
     
     :inputSchema {:type       "object"
                   :properties {:q {:type        "string"
                                    :description "Query string. 
                                                  
+                                                 <STRATEGY>
+                                                 <DONT>
+                                                 Don't use this argument reflexively. Instead try
+                                                 provide additional ids via secondary_contexts_items_ids
+                                                 </DONT>
+                                                 <DO>
+                                                 Before using this argument, always
+                                                 try to make full use of supplying additional
+                                                 contexts via secondary_contexts_items_ids.
+                                                 Only when you repeatedly hit no results,
+                                                 supply a query string.
+                                                 </DO>
+                                                 </STRATEGY>
+
                                                  Before I describe this argument, note that it is often preferential to
-                                                 pre-filter items by using intersection search by passing secondary-contexts-items-ids
+                                                 pre-filter items by using intersection search by passing secondary_contexts_items_ids
                                                  rather than using an actual search term for q.
                                                  
                                                  Obviously, when trying to find anything, we need to narrow down the search result, ideally such that 
                                           the thing we search for is the top search result.
                                                  
-                                          However, when a selected-context is given, you might want to give an empty query string to see all items available and related to a given context.
+                                          However, when a selected_context is given, you might want to give an empty query string to see all items available and related to a given context.
                                                  
                                                  An even better strategy within Tracker to filter for good results is to specify secondary-contexts-items-ids to 
                                                  search in intersections of contexts. This is often better to use query strings."}
-                               :selected-context-item-id 
+                               :selected_context_item_id 
                                  {:type        "string"
                                   :description "an id number to narrow down the search results to items related to that context.
                                                 when doing intersection searches, use this id for the narrowest/most specific of the contexts."}
-                               :secondary-contexts-items-ids
+                               :secondary_contexts_items_ids
                                {:type "array"
                                 :items {:type "string"}
                                 :description "A definitive success strategy in Tracker:
@@ -119,9 +142,10 @@
                                               by additional contexts, only items are shown which are also part of these other contexts.
                                               
                                               When doing intersection searches, make broader and more generic categories  
-                                              be deployed via secondary-contexts-items-ids and reserve selected-context-item-id 
+                                              be deployed via secondary_contexts_items_ids and reserve selected-context-item-id 
                                               for the narrowest of the contexts."}}
-                  :required   ["q" "selected-context-item-id"]}}
+                  :required   ["q" "selected_context_item_id"
+                               "secondary_contexts_items_ids"]}}
    :get-item   {:name        "get_item"
                 :description "Asks Tracker about a single item, and that means, in contrast
                         to listing items with for example get_issues, that the description is included,
@@ -130,27 +154,27 @@
                               
                         Also, once you have an issue that looks interesting, you should definitely
                         more often than not also check for its related item, ussing its id,
-                              using get_related_items and the selected-context-item-id parameter.
+                              using get_related_items and the selected_context_item_id parameter.
                               "
                 :inputSchema {:type       "object"
                               :properties {:id {:type        "string"
                                                 :description "the item's id, as the issues returned from get_items and get_related_items always include."}}
                               :required   ["id"]}}})
 
-(defn get-items [{:keys [q selected-context-item-id only-contexts] :as _arguments}]
-  (when selected-context-item-id (throw (IllegalArgumentException. "shouldn't pass selected-context-item-id. For this use get-related-items")))
-  (when (not (or (= "true" only-contexts) (nil? only-contexts))) 
+(defn get-items [{:keys [q selected_context_item_id only_contexts] :as _arguments}]
+  (when selected_context_item_id (throw (IllegalArgumentException. "shouldn't pass selected_context_item_id. For this use get-related-items")))
+  (when (not (or (= "true" only_contexts) (nil? only_contexts))) 
     (throw (IllegalArgumentException. "only contexts should either be \"true\" or nil/null (omit the parameter/argument entirely when it should say anything other than true)")))
-  (if (= "true" only-contexts)
+  (if (= "true" only_contexts)
     (search/search-contexts db (merge {:limit 10 :force-limit? true}))
     (search/search-issues db q (merge {:limit 10 :force-limit? true}))))
 
-(defn get-related-items [{:keys [q selected-context-item-id :secondary-contexts-items-ids] :as _arguments}]
+(defn get-related-items [{:keys [q selected_context_item_id secondary_contexts_items_ids] :as _arguments}]
   (search/search-issues 
    db
    q 
-   {:selected-context {:id   selected-context-item-id
-                       :data {:views {:current {:secondary-contexts secondary-contexts-items-ids}}}}
+   {:selected-context {:id   selected_context_item_id
+                       :data {:views {:current {:secondary-contexts secondary_contexts_items_ids}}}}
     :limit 10
     :force-limit? true}))
 
