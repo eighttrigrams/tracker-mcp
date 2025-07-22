@@ -166,7 +166,7 @@
   (when (not (or (= "true" only_contexts) (nil? only_contexts))) 
     (throw (IllegalArgumentException. "only contexts should either be \"true\" or nil/null (omit the parameter/argument entirely when it should say anything other than true)")))
   (if (= "true" only_contexts)
-    (search/search-contexts db (merge {:limit 10 :force-limit? true}))
+    (search/search-items db (merge {:limit 10 :force-limit? true}))
     (search/search-issues db q (merge {:limit 10 :force-limit? true}))))
 
 (defn get-related-items [{:keys [q selected_context_item_id secondary_contexts_items_ids] :as _arguments}]
@@ -197,6 +197,6 @@
 (comment
   (require '[cheshire.core :as json])
   #_(get-aggregated-contexts {:selected-context-item-id 10935})
-  (search/search-contexts db "")
+  (search/search-items db "")
   (json/generate-string (get-items {:q "YouTube"}))
   (pprint/pprint (get-items {:q "YouTube"})))
