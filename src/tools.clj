@@ -167,19 +167,16 @@
     (throw (IllegalArgumentException. "only contexts should either be \"true\" or nil/null (omit the parameter/argument entirely when it should say anything other than true)")))
   (if (= "true" only_contexts)
     (search/search-items db (merge {:limit 10 :force-limit? true}))
-    (search/search-issues db q (merge {:limit 10 :force-limit? true}))))
+    (search/search-issues db (merge {:q q :limit 10 :force-limit? true}))))
 
 (defn get-related-items [{:keys [q selected_context_item_id secondary_contexts_items_ids] :as _arguments}]
-  (search/search-issues 
+  (search/search-related-items 
    db
    q 
-   {:selected-context {:id   selected_context_item_id
-                       :data {:views {:current {:secondary-contexts secondary_contexts_items_ids}}}}
-    :limit 10
+   selected_context_item_id
+   {:selected-secondary-contexts secondary_contexts_items_ids}
+   {:limit        10
     :force-limit? true}))
-
-#_(defn get-aggregated-contexts [{:keys [selected-context-item-id] :as _arguments}]
-  (search/fetch-aggregated-contexts db {:selected-context {:id selected-context-item-id}}))
 
 (defn get-item [{:keys [id] :as _arguments}]
   (ds/get-item db 
@@ -190,13 +187,10 @@
   (case name
     "get_items" get-items
     "get_related_items" get-related-items
-    ;; "get_aggregated_contexts" get-aggregated-contexts
     "get_item" get-item
     nil))
 
 (comment
   (require '[cheshire.core :as json])
-  #_(get-aggregated-contexts {:selected-context-item-id 10935})
-  (search/search-items db "")
   (json/generate-string (get-items {:q "YouTube"}))
   (pprint/pprint (get-items {:q "YouTube"})))
