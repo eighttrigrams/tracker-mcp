@@ -77,7 +77,9 @@
                   :required   ["q"]}}
    :get-people
    {:name "get_people"
-    :description "Best way to find specific persons in Tracker"
+    :description "Best way to find specific persons in Tracker
+                  Whenever you know the name of a person and want to know mere
+                  look here first!!!"
     :inputSchema 
     {:type       "object"
      :properties {:q             {:type        "string"
@@ -85,14 +87,32 @@
      :required   ["q"]}}
    :get-broad-categories
    {:name "get_broad_categories"
-    :description "A way to find broad categories"
+    :description "A way to find broad categories
+                  
+                  <IMPORTANT>
+                  At the beginning of sessions, do also get_broad_categories
+                  to get an overview of things at the highest levels.
+                  </IMPORTANT>
+
+                  <IMPORTANT>
+                  Note there is a \"Topics\" context which also is nice to do 
+                  a search in.
+                  </IMPORTANT>
+                  "
     :inputSchema 
     {:type       "object"
      :properties {}
      :required   []}}
    :get-collections
    {:name "get_collections"
-    :description "A way to find collections, which are also broad categories"
+    :description "A way to find collections, which are also broad categories
+                  <IMPORTANT>
+                  At the beginning of sessions, do get_collections
+                  to get all collections. Collections contexts are great to know
+                  and great to have for filtering, because they are very broad categories
+                  which contain many items. A collection can for example be memes,
+                  or images, or PNGs or files, or quotes. You see the usefulness?
+                  </IMPORTANT>"
     :inputSchema 
     {:type       "object"
      :properties {}
@@ -105,6 +125,25 @@
                   modification or just having looked at it).
                   
                   <SEARCH STRATEGY>
+
+                  <IMPORTANT>
+                  At the beginning of sessions, do get_collections
+                  to get all collections. Collections contexts are great to know
+                  and great to have for filtering, because they are very broad categories
+                  which contain many items. A collection can for example be memes,
+                  or images, or PNGs or files, or quotes. You see the usefulness?
+                  </IMPORTANT>
+
+                  <IMPORTANT>
+                  At the beginning of sessions, do also get_broad_categories
+                  to get an overview of things at the highest levels.
+                  </IMPORTANT>
+
+                  <IMPORTANT>
+                  Note there is a \"Topics\" context which also is nice to do 
+                  a search in.
+                  </IMPORTANT>
+
                   <DO>
                   Whenever you can, **prefer** intersection search using the secondary_contexts_items_ids
                   argument, thereby narrowing down results with multiple context ids, over using
