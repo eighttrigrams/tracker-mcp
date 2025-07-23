@@ -83,6 +83,20 @@
      :properties {:q             {:type        "string"
                                   :description "Query string to find a specific person, usually put the name or part of the name of the person you are searching for here."}}
      :required   ["q"]}}
+   :get-broad-categories
+   {:name "get_broad_categories"
+    :description "A way to find broad categories"
+    :inputSchema 
+    {:type       "object"
+     :properties {}
+     :required   []}}
+   :get-collections
+   {:name "get_collections"
+    :description "A way to find collections, which are also broad categories"
+    :inputSchema 
+    {:type       "object"
+     :properties {}
+     :required   []}}
    :get-related-items
    {:name        "get_related_items"
     :description "Asks Tracker about related items to a given context item and lists 
@@ -191,6 +205,20 @@
                                {}
                                {:limit 10}))
 
+(defn get-broad-categories [{:as _arguments}]
+  (search/search-related-items db 
+                               "" 
+                               11703
+                               {}
+                               {}))
+
+(defn get-collections [{:as _arguments}]
+  (search/search-related-items db 
+                               ""
+                               11931
+                               {}
+                               {}))
+
 (defn get-related-items [{:keys [q selected_context_item_id secondary_contexts_items_ids] :as _arguments}]
   (search/search-related-items 
    db
@@ -206,8 +234,10 @@
 
 (defn map-tool [name]
   (case name
-    "get_items" get-items
+    "get_items" get-items ;; instead of only-contexts, we could also a get_topics tool
     "get_people" get-people
+    "get_broad_categories" get-broad-categories
+    "get_collections" get-collections
     "get_related_items" get-related-items
     "get_item" get-item
     nil))
