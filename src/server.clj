@@ -1,7 +1,6 @@
 (ns server
   (:require [cheshire.core :as json] 
-            tools
-            [clojure.edn :as edn]))
+            tools))
 
 (defn handle-request [request]
   (let [method (:method request)
