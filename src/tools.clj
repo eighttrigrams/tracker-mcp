@@ -38,12 +38,16 @@
      but without description. So at any point, if you have an item in tracker,
      to fetch its description to get more insight to inform further searches, 
      use the get_item tool, to get the item with its description.
+
+     When searching for specific persons you know the name of, try using the get_people tool.
      </DO>
      <DONT>
      Instead of for example searching for \"World War II videos\", in Tracker,
      always search for \"World War II\" and \"Videos\" contexts. Longer chains
      of words in searches are indicators that the purpose of Tracker as an intersection
      search based search system is defeated, or its potential not fully used during search.
+     
+     Don't use this reflexively to search for people you know names of. For that, rather use the get_people tool.
      </DONT>
      </SEARCH STRATEGY>
 
@@ -71,6 +75,14 @@
                                                  :description "with a value \"true\" on this parameter, it lists only items marked as contexts. These are more often better entrypoints into a search consisting of possibly
                                                                 multiple tool calls with follow ups via get_related_items than a broader search without that parameter would be. Prefer that to get the broad categories of a search right first."}}
                   :required   ["q"]}}
+   :get-people
+   {:name "get_people"
+    :description "Best way to find specific persons in Tracker"
+    :inputSchema 
+    {:type       "object"
+     :properties {:q             {:type        "string"
+                                  :description "Query string to find a specific person, usually put the name or part of the name of the person you are searching for here."}}
+     :required   ["q"]}}
    :get-related-items
    {:name        "get_related_items"
     :description "Asks Tracker about related items to a given context item and lists 
@@ -93,6 +105,8 @@
                   Quotes is the broader category, so the quotes id is provided via
                   secondary_contexts_items_ids and the Second World War id is provided via
                   selected_context_item_id.
+
+                  When searching for specific persons you know the name of, try using the get_people tool.
                   </DO>
                   <DONT>
                   Avoid doing searches without at least trying intersections
@@ -165,9 +179,17 @@
   (when selected_context_item_id (throw (IllegalArgumentException. "shouldn't pass selected_context_item_id. For this use get-related-items")))
   (when (not (or (= "true" only_contexts) (nil? only_contexts))) 
     (throw (IllegalArgumentException. "only contexts should either be \"true\" or nil/null (omit the parameter/argument entirely when it should say anything other than true)")))
-  (if (= "true" only_contexts)
-    (search/search-items db (merge {:limit 10 :force-limit? true}))
-    (search/search-issues db (merge {:q q :limit 10 :force-limit? true}))))
+  (search/search-items db 
+                       q 
+                       (merge {} (when-not (= "true" only_contexts) {:all-items? true}))
+                       {:limit 10}))
+
+(defn get-people [{:keys [q] :as _arguments}]
+  (search/search-related-items db 
+                               q 
+                               10960
+                               {}
+                               {:limit 10}))
 
 (defn get-related-items [{:keys [q selected_context_item_id secondary_contexts_items_ids] :as _arguments}]
   (search/search-related-items 
@@ -175,8 +197,7 @@
    q 
    selected_context_item_id
    {:selected-secondary-contexts secondary_contexts_items_ids}
-   {:limit        10
-    :force-limit? true}))
+   {:limit 10}))
 
 (defn get-item [{:keys [id] :as _arguments}]
   (ds/get-item db 
@@ -186,6 +207,7 @@
 (defn map-tool [name]
   (case name
     "get_items" get-items
+    "get_people" get-people
     "get_related_items" get-related-items
     "get_item" get-item
     nil))
