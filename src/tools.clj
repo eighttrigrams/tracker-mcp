@@ -213,11 +213,12 @@
                                {}))
 
 (defn get-collections [{:as _arguments}]
-  (search/search-related-items db 
-                               ""
-                               11931
-                               {}
-                               {}))
+  (map #(select-keys % [:id :title :short_title :tags])
+       (search/search-related-items db 
+                                    ""
+                                    11931
+                                    {}
+                                    {})))
 
 (defn get-related-items [{:keys [q selected_context_item_id secondary_contexts_items_ids] :as _arguments}]
   (search/search-related-items 
@@ -226,6 +227,11 @@
    selected_context_item_id
    {:selected-secondary-contexts secondary_contexts_items_ids}
    {:limit 10}))
+
+(defn trim-to [n text]
+  (if (> (count text) n)
+    (subs text 0 n)
+    text))
 
 (defn get-item [{:keys [id] :as _arguments}]
   (ds/get-item db 
@@ -245,4 +251,8 @@
 (comment
   (require '[cheshire.core :as json])
   (json/generate-string (get-items {:q "YouTube"}))
-  (pprint/pprint (get-items {:q "YouTube"})))
+  (pprint/pprint (get-items {:q "YouTube"}))
+  
+  (pprint/pprint (get-collections {}))
+  (pprint/pprint (trim-to 500 (:description (get-item {:id 34696}))))
+  )
