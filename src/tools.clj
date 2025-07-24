@@ -213,20 +213,47 @@
                                               for the narrowest of the contexts."}}
                   :required   ["q" "selected_context_item_id"
                                "secondary_contexts_items_ids"]}}
-   :get-item   {:name        "get_item"
-                :description "Asks Tracker about a single item, and that means, in contrast
-                        to listing items with for example get_issues, that the description is included,
-                        Which is what we are often also interested in, once we identified the specific 
-                        item we are after.
+   :get-item-with-description-and-related-items
+   {:name "get_item_with_description_and_related_items"
+    :description 
+    "When we are dealing with items which are not contexts (i.e. `is_context` is false)
+     these are what one could consider leaf nodes which have not the character
+     of being a subject, a topic, a collection, a category, or a container.
+     
+     In Tracker, relations have no clearly defined semantics per se, so by design we do not precisely
+     define why items are related to another item. In the case of these leaf character items,
+     which often have longer titles (IMPORTANT!) than the other mentioned types of items like subjects,
+     topics, collections, categories, or containers (which tend to have shorter titles),
+     when we fetch them, we excpect them to have at most a few related items. In this
+     case we are interested in getting their description as well as these related items
+     at once and prefer that (IMPORTANT!) definitely for those types of items over calls to 
+     the \"get_item\" tool.
+     "
+    :inputSchema {:type       "object"
+                  :properties {:id {:type        "string"
+                                    :description "the item's id, as the issues returned from get_items and get_related_items always include."}}
+                  :required   ["id"]}}
+   :get-item 
+   {:name        "get_item"
+    :description 
+    "One thing upfront. For items which are not of context character 
+     (like topics, subjects, containers, collections, resources), prefer the 
+     \"get_item_with_description_and_related_items\" over calls to \"get_item\" 
+     plus \"get_related_items\".
+
+     Asks Tracker about a single item, and that means, in contrast
+     to listing items with for example get_issues, that the description is included,
+     Which is what we are often also interested in, once we identified the specific 
+     item we are after.
                               
-                        Also, once you have an issue that looks interesting, you should definitely
-                        more often than not also check for its related item, ussing its id,
-                              using get_related_items and the selected_context_item_id parameter.
+     Also, once you have an issue that looks interesting, you should definitely
+     more often than not also check for its related item, ussing its id,
+     using get_related_items and the selected_context_item_id parameter.
                               "
-                :inputSchema {:type       "object"
-                              :properties {:id {:type        "string"
-                                                :description "the item's id, as the issues returned from get_items and get_related_items always include."}}
-                              :required   ["id"]}}})
+    :inputSchema {:type       "object"
+                  :properties {:id {:type        "string"
+                                    :description "the item's id, as the issues returned from get_items and get_related_items always include."}}
+                  :required   ["id"]}}})
 
 (defn get-items [{:keys [q selected_context_item_id only_contexts] :as _arguments}]
   (when selected_context_item_id (throw (IllegalArgumentException. "shouldn't pass selected_context_item_id. For this use get-related-items")))
@@ -277,6 +304,12 @@
                ;; TODO make the & arg-map thing to pass in :id id without specifying map, then check whether arg is id, or title, to replace get-by-title
                {:id id}))
 
+(defn get-item-with-description-and-related-items [{:keys [id] :as _arguments}]
+  (let [item (ds/get-item db {:id id})]
+    (when (:is_context item) (throw (UnsupportedOperationException. "Call this only for non is_context items.")))
+    {:item-with-description item 
+     :related-items (search/search-related-items db "" (:id item) {:selected-secondary-contexts []} {})}))
+
 (defn map-tool [name]
   (case name
     "get_items" get-items ;; instead of only-contexts, we could also a get_topics tool
@@ -285,6 +318,7 @@
     "get_collections" get-collections
     "get_related_items" get-related-items
     "get_item" get-item
+    "get_item_with_description_and_related_items" get-item-with-description-and-related-items
     nil))
 
 (comment

@@ -21,9 +21,12 @@
              f (tools/map-tool tool-name)]
          (if f 
            (let [result (try (f arguments)
-                         (catch IllegalArgumentException e
-                           {:error {:code -32602
-                                    :message (.getMessage e)}}))]
+                             (catch IllegalArgumentException e
+                               {:error {:code    -32602
+                                        :message (.getMessage e)}})
+                             (catch UnsupportedOperationException e
+                               {:error {:code    -32801
+                                        :message (.getMessage e)}}))]
              {:result  {:content [{:type "text"
                                    :text (json/generate-string result)}]}}) 
            {:error   {:code    -32601
