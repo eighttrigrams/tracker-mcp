@@ -15,24 +15,51 @@
                                     "/tracker/config.edn")))))
 
 (def tools-list 
-  {:get-items
+  {:get-contexts
+   {:name "get_contexts"
+    :description 
+    "Tracker is a superhuman memory system which here represent's my (Daniel, the User) memory.
+     Instead of sending long search strings to this MCP, often one finds things by looking
+     them up in the right category, which in Tracker is called \"Context\".
+
+     Everything is an \"Item\" in Tracker. It is the basic unit. 
+     And the \"Contexts\" are a subset of all the \"Items\" stored in Tracker.
+     \"Contexts\" may denote subjects, topics, collections, categories, or simply items that group a lot of other items.
+
+     Searches in Tracker are done, instead of sending long search strings, rather by finding items in the right contexts.
+     This is why every search in Tracker should start with breaking down the thing we search into their likely categories (contexts)
+     they might be found in, and then find related items.
+
+     \"Contexts\" tend to have shorter titles, non context \"Items\" tend to have longer, 
+     more specific titles (who's titles are unlikely to be matched by any particular search terms \"q\")."
+    :inputSchema
+    {:type       "object"
+     :properties
+     {:q             
+      {:type        "string"
+       :maxLength 15
+       :description "<IMPORTANT>With more than one search term, usually prefer two queries to the tool with each word over one call with a \"q\" comprised of two words.
+                     Example. Rather than \"books reading\" issue one call with \"q\" as \"books\", and if that yields nothing, try \"q\" with \"reading\". Keep it short
+                     and break search terms down.</IMPORTANT>
+                     
+                     Query string. Obviously, when trying to find anything, we need to narrow down the search result, ideally such that 
+                     the thing we search for is the top search result. Note that normally we limit the results to 10, so you might not even see any more."}}
+     :required   ["q"]}}
+   :get-items
    {:name        "get_items"
     :description 
-    "When I am in Claude and ask what I think about this or that or 
-     anything relating to my memory (as the current user using Claude and its tools)
-     I am actually making a reference to Tracker/the Tracker system.
-
-     Tracker's main features include
-     - intersection search.
-
-     @tool get_items
+    "@tool get_items
+     
      <SEARCH STRATEGY>
+     <DO>
+     Before calling this tool, especially when you are about to call it with longer search terms, consider calling the \"get_contexts\" tool first.
+     </DO>
+
      <DO>
      Search in Tracker system usually involve multiple tool calls to various tools
      to finally arrive at good search results. The first step in such a search-chain is
      always via get_items, and specifically the first step is always to find a couple
-     of suitable contexts (items which stand for categories under which many other items
-     are grouped), which is done using the only_contexts argument set to \"true\".
+     of suitable contexts via get_contexts.
 
      In general search results in tracker yield items (which may or may not be considered context items, see property is_context),
      but without description. So at any point, if you have an item in tracker,
@@ -68,12 +95,9 @@
      can get its description via get_item, and find items related to it via
      get_related_items."
     :inputSchema {:type       "object"
-                  :properties {:q                {:type        "string"
-                                                  :description "Query string. Obviously, when trying to find anything, we need to narrow down the search result, ideally such that 
-                                          the thing we search for is the top search result. Note that normally we limit the results to 10, so you might not even see any more."}
-                               :only_contexts   {:type        "string" 
-                                                 :description "with a value \"true\" on this parameter, it lists only items marked as contexts. These are more often better entrypoints into a search consisting of possibly
-                                                                multiple tool calls with follow ups via get_related_items than a broader search without that parameter would be. Prefer that to get the broad categories of a search right first."}}
+                  :properties {:q {:type        "string"
+                                   :description "Query string. Obviously, when trying to find anything, we need to narrow down the search result, ideally such that 
+                                          the thing we search for is the top search result. Note that normally we limit the results to 10, so you might not even see any more."}}
                   :required   ["q"]}}
    :get-people
    {:name "get_people"
@@ -255,14 +279,17 @@
                                     :description "the item's id, as the issues returned from get_items and get_related_items always include."}}
                   :required   ["id"]}}})
 
-(defn get-items [{:keys [q selected_context_item_id only_contexts] :as _arguments}]
-  (when selected_context_item_id (throw (IllegalArgumentException. "shouldn't pass selected_context_item_id. For this use get-related-items")))
-  (when (not (or (= "true" only_contexts) (nil? only_contexts))) 
+(defn get-contexts [{:keys [q] :as _arguments}]
+  #_(when selected_context_item_id (throw (IllegalArgumentException. "shouldn't pass selected_context_item_id. For this use get-related-items")))
+  #_(when (not (or (= "true" only_contexts) (nil? only_contexts))) 
     (throw (IllegalArgumentException. "only contexts should either be \"true\" or nil/null (omit the parameter/argument entirely when it should say anything other than true)")))
-  (search/search-items db 
-                       q 
-                       (merge {} (when-not (= "true" only_contexts) {:all-items? true}))
-                       {:limit 10}))
+  (search/search-items db q {} {:limit 10}))
+
+(defn get-items [{:keys [q selected_context_item_id _only_contexts] :as _arguments}]
+  (when selected_context_item_id (throw (IllegalArgumentException. "shouldn't pass selected_context_item_id. For this use get-related-items"))) ;; ??
+  #_(when (not (or (= "true" only_contexts) (nil? only_contexts))) 
+    (throw (IllegalArgumentException. "only contexts should either be \"true\" or nil/null (omit the parameter/argument entirely when it should say anything other than true)")))
+  (search/search-items db q {:all-items? true} {:limit 10}))
 
 (defn get-people [{:keys [q] :as _arguments}]
   (search/search-related-items db 
@@ -312,7 +339,8 @@
 
 (defn map-tool [name]
   (case name
-    "get_items" get-items ;; instead of only-contexts, we could also a get_topics tool
+    "get_contexts" get-contexts
+    "get_items" get-items
     "get_people" get-people
     "get_broad_categories" get-broad-categories
     "get_collections" get-collections

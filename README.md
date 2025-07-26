@@ -48,5 +48,5 @@ $ echo '{"id":1,"method":"initialize","params":{}}' | /Users/daniel/Workspace/ei
 Run
 
 ```sh
-$ claude mcp add tracker -- sh /Users/daniel/Workspace/eighttrigrams/tracker-mcp/run.sh
+$ claude mcp add tracker -- sh /Users/daniel/Workspace/eighttrigrams/tracker.project/tracker-mcp/run.sh
 ```
