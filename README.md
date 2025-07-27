@@ -15,7 +15,11 @@ and then feed it lines like
 
 ```json
 {"id":1,"method":"initialize","params":{}}
+```
+
 or
+
+```json
 {"id":3,"method":"tools/call","params":{"name":"get_related_items","arguments":{"selected-context-item-id":"10935", "q":"", "secondary-contexts-items-ids":["11041"]}}}
 ```
 
