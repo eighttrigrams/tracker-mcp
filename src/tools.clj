@@ -116,7 +116,8 @@
     :description "A way to find broad categories
                   
                   <IMPORTANT>
-                  At the beginning of sessions, do also get_broad_categories
+                  At the beginning of sessions (between clears of the context window), 
+                  do also get_broad_categories
                   to get an overview of things at the highest levels.
                   </IMPORTANT>
 
@@ -125,20 +126,6 @@
                   a search in.
                   </IMPORTANT>
                   "
-    :inputSchema 
-    {:type       "object"
-     :properties {}
-     :required   []}}
-   :get-collections
-   {:name "get_collections"
-    :description "A way to find collections, which are also broad categories
-                  <IMPORTANT>
-                  At the beginning of sessions, do get_collections
-                  to get all collections. Collections contexts are great to know
-                  and great to have for filtering, because they are very broad categories
-                  which contain many items. A collection can for example be memes,
-                  or images, or PNGs or files, or quotes. You see the usefulness?
-                  </IMPORTANT>"
     :inputSchema 
     {:type       "object"
      :properties {}
@@ -224,8 +211,8 @@
                                                  An even better strategy within Tracker to filter for good results is to specify secondary-contexts-items-ids to 
                                                  search in intersections of contexts. This is often better to use query strings."}
                                :selected_context_item_id 
-                                 {:type        "string"
-                                  :description "an id number to narrow down the search results to items related to that context.
+                               {:type        "string"
+                                :description "an id number to narrow down the search results to items related to that context.
                                                 when doing intersection searches, use this id for the narrowest/most specific of the contexts."}
                                :secondary_contexts_items_ids
                                {:type "array"
@@ -307,14 +294,6 @@
                                {}
                                {}))
 
-(defn get-collections [{:as _arguments}]
-  (map #(select-keys % [:id :title :short_title :tags])
-       (search/search-related-items db 
-                                    ""
-                                    11931
-                                    {}
-                                    {})))
-
 (defn get-related-items [{:keys [q selected_context_item_id secondary_contexts_items_ids] :as _arguments}]
   (search/search-related-items 
    db
@@ -345,7 +324,6 @@
     "get_items" get-items
     "get_people" get-people
     "get_broad_categories" get-broad-categories
-    "get_collections" get-collections
     "get_related_items" get-related-items
     "get_item" get-item
     "get_item_with_description_and_related_items" get-item-with-description-and-related-items
@@ -356,6 +334,5 @@
   (json/generate-string (get-items {:q "YouTube"}))
   (pprint/pprint (get-items {:q "YouTube"}))
   
-  (pprint/pprint (get-collections {}))
   (pprint/pprint (trim-to 500 (:description (get-item {:id 34696}))))
   )
