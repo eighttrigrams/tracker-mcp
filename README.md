@@ -1,6 +1,6 @@
-# Weather MCP Server
+# Tracker MCP
 
-A minimal MCP (Model Context Protocol) server that provides fake weather information.
+For minimal Clojure MCP examples see [eighttrigrams/clojure-claude-and-mcp-knowledge](https://github.com/eighttrigrams/clojure-claude-and-mcp-knowledge).
 
 ## Run continuously
 
