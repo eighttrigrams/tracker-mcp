@@ -96,6 +96,7 @@
      get_related_items."
     :inputSchema {:type       "object"
                   :properties {:q {:type        "string"
+                                   :minLength 3
                                    :description "Query string. Obviously, when trying to find anything, we need to narrow down the search result, ideally such that 
                                           the thing we search for is the top search result. Note that normally we limit the results to 10, so you might not even see any more."}}
                   :required   ["q"]}}
@@ -106,8 +107,9 @@
                   look here first!!!"
     :inputSchema 
     {:type       "object"
-     :properties {:q             {:type        "string"
-                                  :description "Query string to find a specific person, usually put the name or part of the name of the person you are searching for here."}}
+     :properties {:q {:type        "string"
+                      :minLength   2
+                      :description "Query string to find a specific person, usually put the name or part of the name of the person you are searching for here."}}
      :required   ["q"]}}
    :get-broad-categories
    {:name "get_broad_categories"
