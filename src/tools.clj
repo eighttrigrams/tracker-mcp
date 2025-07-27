@@ -112,25 +112,6 @@
                       :minLength   2
                       :description "Query string to find a specific person, usually put the name or part of the name of the person you are searching for here."}}
      :required   ["q"]}}
-   :get-broad-categories
-   {:name "get_broad_categories"
-    :description "A way to find broad categories
-                  
-                  <IMPORTANT>
-                  At the beginning of sessions (between clears of the context window), 
-                  do also get_broad_categories
-                  to get an overview of things at the highest levels.
-                  </IMPORTANT>
-
-                  <IMPORTANT>
-                  Note there is a \"Topics\" context which also is nice to do 
-                  a search in.
-                  </IMPORTANT>
-                  "
-    :inputSchema 
-    {:type       "object"
-     :properties {}
-     :required   []}}
    :get-related-items
    {:name        "get_related_items"
     :description "Asks Tracker about related items to a given context item and lists 
@@ -139,24 +120,6 @@
                   modification or just having looked at it).
                   
                   <SEARCH STRATEGY>
-
-                  <IMPORTANT>
-                  At the beginning of sessions, do get_collections
-                  to get all collections. Collections contexts are great to know
-                  and great to have for filtering, because they are very broad categories
-                  which contain many items. A collection can for example be memes,
-                  or images, or PNGs or files, or quotes. You see the usefulness?
-                  </IMPORTANT>
-
-                  <IMPORTANT>
-                  At the beginning of sessions, do also get_broad_categories
-                  to get an overview of things at the highest levels.
-                  </IMPORTANT>
-
-                  <IMPORTANT>
-                  Note there is a \"Topics\" context which also is nice to do 
-                  a search in.
-                  </IMPORTANT>
 
                   <DO>
                   Whenever you can, **prefer** intersection search using the secondary_contexts_items_ids
@@ -181,7 +144,6 @@
                   </DONT>
                   </SEARCH STRATEGY>
                   "
-    
     :inputSchema {:type       "object"
                   :properties {:q {:type        "string"
                                    :description "Query string. 
@@ -288,13 +250,6 @@
                                {}
                                {:limit 10}))
 
-(defn get-broad-categories [{:as _arguments}]
-  (search/search-related-items db 
-                               "" 
-                               11703
-                               {}
-                               {}))
-
 (defn get-related-items [{:keys [q selected_context_item_id secondary_contexts_items_ids] :as _arguments}]
   (search/search-related-items 
    db
@@ -324,7 +279,6 @@
     "get_contexts" get-contexts
     "get_items" get-items
     "get_people" get-people
-    "get_broad_categories" get-broad-categories
     "get_related_items" get-related-items
     "get_item" get-item
     "get_item_with_description_and_related_items" get-item-with-description-and-related-items
