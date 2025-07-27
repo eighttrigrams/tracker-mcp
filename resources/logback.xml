@@ -6,6 +6,7 @@
     </encoder>
   </appender>
 
+  <!-- Making sure no logging pollutes stdout -->
   <root level="INFO">
     <appender-ref ref="FILE" />
   </root>
