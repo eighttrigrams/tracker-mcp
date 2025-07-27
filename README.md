@@ -2,6 +2,7 @@
 
 See also
 - [eighttrigrams/clojure-claude-and-mcp-knowledge](https://github.com/eighttrigrams/clojure-claude-and-mcp-knowledge).
+- [eighttrigrams/vesicapiscis](https://github.com/eighttrigrams/vesicapiscis)
 
 ## Run
 
