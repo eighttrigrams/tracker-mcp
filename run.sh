@@ -1,3 +1,4 @@
 #!/bin/bash
 cd "$(dirname "$0")"
-clojure -M:run
+# exec clojure -M:run 2>/dev/null
+clj -M:run

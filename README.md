@@ -38,15 +38,7 @@ $ echo '{"id":1,"method":"initialize","params":{}}' | /Users/daniel/Workspace/ei
 {"id":3,"method":"tools/call","params":{"name":"get_related_items","arguments":{"selected-context-item-id":"10935", "q":"", "secondary-contexts-items-ids":["11041"]}}}
 ```
 
-## Features
+## Implementation note
 
-- Implements MCP protocol version 2024-11-05
-- Provides a `get_issues` tool that returns up to 10 search hits at a time
-
-## Adding to Claude Code
-
-Run
-
-```sh
-$ claude mcp add tracker -- sh /Users/daniel/Workspace/eighttrigrams/tracker.project/tracker-mcp/run.sh
-```
+Make sure to re-route all log events from the underlying lib to stderr or
+to a logfile.
