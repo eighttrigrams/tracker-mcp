@@ -11,7 +11,7 @@
        (cond
          (= method "initialize")
          {:result {:protocolVersion "2024-11-05"
-                   :capabilities    {:tools {}}  ;; Just declare "we have tools"
+                   :capabilities    {:tools {}}
                    :serverInfo      {:name    "tracker-mcp"
                                      :version "1.0.0"}}}
          (= method "tools/list")
