@@ -37,6 +37,7 @@
      :properties
      {:q             
       {:type        "string"
+       :minLength 3
        :maxLength 15
        :description "<IMPORTANT>With more than one search term, usually prefer two queries to the tool with each word over one call with a \"q\" comprised of two words.
                      Example. Rather than \"books reading\" issue one call with \"q\" as \"books\", and if that yields nothing, try \"q\" with \"reading\". Keep it short
