@@ -287,7 +287,6 @@
     nil))
 
 (comment
-  (require '[cheshire.core :as json])
   (json/generate-string (get-items {:q "YouTube"}))
   (pprint/pprint (get-items {:q "YouTube"}))
   
