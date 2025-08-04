@@ -1,9 +1,6 @@
-{:hooks {:analyze-call {cambium.core/deflogfn hooks.cambium/deflogfn}}
- :linters {:unresolved-symbol {:exclude [cambium.core/trace
+{:linters {:unresolved-symbol {:exclude [cambium.core/trace
                                         cambium.core/debug  
                                         cambium.core/info
                                         cambium.core/warn
                                         cambium.core/error
                                         cambium.core/fatal]}}}
-
-
