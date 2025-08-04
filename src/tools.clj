@@ -1,9 +1,9 @@
 (ns tools
   (:require [clojure.edn :as edn]
+            [cambium.core :as log]
             [et.vp.ds.search :as search]
             [et.vp.ds :as ds]
             [clojure.pprint :as pprint]
-            tools
             [cheshire.core :as json]))
 
 (def env :prod)
@@ -243,17 +243,19 @@
     (throw (IllegalArgumentException. "only contexts should either be \"true\" or nil/null (omit the parameter/argument entirely when it should say anything other than true)")))
   (search/search-items db q {:all-items? true} {:limit 10}))
 
-(defn get-people [{:keys [q] :as _arguments}]
+(defn get-people [{:keys [q] :as arguments}]
+  (log/info {:arguments arguments} "get-people")
   (search/search-related-items db 
                                q 
                                10960
                                {}
                                {:limit 10}))
 
-(defn get-related-items [{:keys [q selected_context_item_id secondary_contexts_items_ids] :as _arguments}]
-  (search/search-related-items 
+(defn get-related-items [{:keys [q selected_context_item_id secondary_contexts_items_ids] :as arguments}]
+  (log/info {:arguments arguments} "get-related-items")
+  (search/search-related-items
    db
-   q 
+   q
    selected_context_item_id
    {:selected-secondary-contexts secondary_contexts_items_ids}
    {:limit 10}))
