@@ -1,6 +1,1 @@
-{:linters {:unresolved-symbol {:exclude [cambium.core/trace
-                                        cambium.core/debug  
-                                        cambium.core/info
-                                        cambium.core/warn
-                                        cambium.core/error
-                                        cambium.core/fatal]}}}
+{:linters {:unresolved-var {:exclude [cambium.core/info]}}}
