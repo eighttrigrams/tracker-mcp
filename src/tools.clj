@@ -245,7 +245,8 @@
                                     :description "the item's id, as the issues returned from get_items and get_related_items always include."}}
                   :required   ["id"]}}})
 
-(defn get-contexts [{:keys [q] :as _arguments}]
+(defn get-contexts [{:keys [q] :as arguments}]
+  (log/info {:arguments arguments} "get-contexts")
   #_(when selected_context_item_id (throw (IllegalArgumentException. "shouldn't pass selected_context_item_id. For this use get-related-items")))
   #_(when (not (or (= "true" only_contexts) (nil? only_contexts))) 
     (throw (IllegalArgumentException. "only contexts should either be \"true\" or nil/null (omit the parameter/argument entirely when it should say anything other than true)")))
@@ -316,12 +317,14 @@
     (subs text 0 n)
     text))
 
-(defn get-item [{:keys [id] :as _arguments}]
+(defn get-item [{:keys [id] :as arguments}]
+  (log/info {:arguments arguments} "get-item")
   (convert-item (ds/get-item db 
                ;; TODO make the & arg-map thing to pass in :id id without specifying map, then check whether arg is id, or title, to replace get-by-title
                              {:id id})))
 
-(defn get-item-with-description-and-related-items [{:keys [id] :as _arguments}]
+(defn get-item-with-description-and-related-items [{:keys [id] :as arguments}]
+  (log/info {:arguments arguments} "get-item-with-description-and-related-items")
   (let [item (ds/get-item db {:id id})]
     (when (:is_context item) (throw (UnsupportedOperationException. "Call this only for non is_context items.")))
     {:item-with-description (convert-item item) 
