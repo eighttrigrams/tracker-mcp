@@ -251,46 +251,49 @@
     (throw (IllegalArgumentException. "only contexts should either be \"true\" or nil/null (omit the parameter/argument entirely when it should say anything other than true)")))
   (search/search-items db q {} {:limit 10}))
 
+(defn- blank?
+  [x]
+  (or (nil? x) (and (string? x) (= "" x)) (and (coll? x) (empty? x))))
+
+(defn- convert-item
+  ([item] (convert-item nil item))
+  ([i item]
+   (let [item (-> item
+                  (dissoc :sort_idx)
+                  (assoc :last-seen (:updated_at (:update_at item)))
+                  (dissoc :updated_at)
+                  ;; probably unnecessary
+                  (dissoc :updated_at_ctx))
+         item (if i (assoc item :result-rank (inc i)) item)
+         item (into {} (remove (comp blank? second) item))]
+     (update item
+             :data
+             (fn [data]
+               (-> data
+                   (dissoc :contexts)
+                   (assoc :items (:contexts data))
+                   (update :items
+                           (fn [items]
+                             (into {}
+                                   (map (fn [[id item]] [id
+                                                         (-> item
+                                                             (dissoc
+                                                               :show-badge?))])
+                                     items))))))))))
+
 (defn get-items [{:keys [q selected_context_item_id _only_contexts] :as _arguments}]
   (when selected_context_item_id (throw (IllegalArgumentException. "shouldn't pass selected_context_item_id. For this use get-related-items"))) ;; ??
   #_(when (not (or (= "true" only_contexts) (nil? only_contexts))) 
     (throw (IllegalArgumentException. "only contexts should either be \"true\" or nil/null (omit the parameter/argument entirely when it should say anything other than true)")))
-  (search/search-items db q {:all-items? true} {:limit 10}))
+  (map-indexed convert-item (search/search-items db q {:all-items? true} {:limit 10})))
 
 (defn get-people [{:keys [q] :as arguments}]
   (log/info {:arguments arguments} "get-people")
-  (search/search-related-items db 
-                               q 
-                               10960
-                               {}
-                               {:limit 10}))
-
-(defn- blank? [x]
-  (or (nil? x) 
-      (and (string? x) (= "" x))
-      (and (coll? x) (empty? x))))
-
-(defn- convert-item [i item]
-  (let [item (-> item
-                 (assoc :result-rank (inc i))
-                 (dissoc :sort_idx)
-                 (assoc :last-seen (:updated_at (:update_at item)))
-                 (dissoc :updated_at)
-                 ;; probably unnecessary
-                 (dissoc :updated_at_ctx))
-        item (into {} (remove (comp blank? second) item))]
-    (update item :data (fn [data]
-                         (-> data
-                             (dissoc :contexts)
-                             (assoc :items 
-                                    (:contexts data))
-                             (update :items 
-                                     (fn [items] 
-                                       (into {}
-                                             (map (fn [[id item]] 
-                                                    [id (-> item
-                                                            (dissoc :show-badge?))])
-                                                  items)))))))))
+  (map-indexed convert-item (search/search-related-items db 
+                                                         q 
+                                                         10960
+                                                         {}
+                                                         {:limit 10})))
 
 (defn get-related-items [{:keys [q selected_context_item_id secondary_contexts_items_ids] :as arguments}]
   (log/info {:arguments arguments} "get-related-items")
@@ -302,9 +305,7 @@
                  {:limit (if (seq secondary_contexts_items_ids)
                            100
                            10)})
-        results (map-indexed (fn [i item] 
-                               (convert-item i item)) 
-                             results)]
+        results (map-indexed convert-item results)]
     results))
 
 (comment
@@ -316,15 +317,17 @@
     text))
 
 (defn get-item [{:keys [id] :as _arguments}]
-  (ds/get-item db 
+  (convert-item (ds/get-item db 
                ;; TODO make the & arg-map thing to pass in :id id without specifying map, then check whether arg is id, or title, to replace get-by-title
-               {:id id}))
+                             {:id id})))
 
 (defn get-item-with-description-and-related-items [{:keys [id] :as _arguments}]
   (let [item (ds/get-item db {:id id})]
     (when (:is_context item) (throw (UnsupportedOperationException. "Call this only for non is_context items.")))
-    {:item-with-description item 
-     :related-items (search/search-related-items db "" (:id item) {:selected-secondary-contexts []} {})}))
+    {:item-with-description (convert-item item) 
+     :related-items (map-indexed 
+                     convert-item 
+                     (search/search-related-items db "" (:id item) {:selected-secondary-contexts []} {}))}))
 
 (defn map-tool [name]
   (case name
