@@ -118,23 +118,35 @@
                   them in the order
                   most recently touched first (where touched can mean a 
                   modification or just having looked at it).
+
+                  get_related_items returns only up to 10 results by default,
+                  but up to a 100 when secondary_contexts_items_ids is not empty.
                   
                   <SEARCH STRATEGY>
-
-                  <DO>
                   Whenever you can, **prefer** intersection search using the secondary_contexts_items_ids
                   argument, thereby narrowing down results with multiple context ids, over using
                   all to specific search strings provided under the q parameter.
                   
-                  If you can get away with it, then use multiple ids in secondary_contexts_items_ids
+                  If you can get away with it, then use not only one, 
+                  but even multiple ids in secondary_contexts_items_ids
                   to make the search even narrower defined. 
                   
                   When doing that, make the broader categories/contexts ids be provided
                   in secondary_contexts_items_ids and the less specific id provided as
-                  selected-context-item-id. For example, Quotes on the Second World War ->
-                  Quotes is the broader category, so the quotes id is provided via
-                  secondary_contexts_items_ids and the Second World War id is provided via
-                  selected_context_item_id.
+                  selected-context-item-id. 
+                  
+                  Example search:
+                  ### Searching for quotes on the Second World War
+                  1) Search for 'Quotes' (get_items)
+                  2) Search for 'Second World War' (get_items)
+                  3) Get related items, with selected_context_item_id of 'Second World War' and 
+                    secondary_contexts_items_ids of [id of 'Memes']. (get_related_items)
+                  
+                  ### Memes on the topic of the Scientific Method
+                  1) Search for 'Memes' (get_items)
+                  2) Search for 'Scientific Method' (get_items)
+                  3) Get related items, with selected_context_item_id of 'Scientific Method' and 
+                    secondary_contexts_items_ids of [id of 'Memes']. (get_related_items)
 
                   When searching for specific persons you know the name of, try using the get_people tool.
                   </DO>
@@ -142,53 +154,55 @@
                   Avoid doing searches without at least trying intersections
                   using secondary_contexts_items_ids argument.
                   </DONT>
-                  </SEARCH STRATEGY>
-                  "
-    :inputSchema {:type       "object"
-                  :properties {:q {:type        "string"
-                                   :description "Query string. 
-                                                 
-                                                 <STRATEGY>
-                                                 <DONT>
-                                                 Don't use this argument reflexively. Instead try
-                                                 provide additional ids via secondary_contexts_items_ids
-                                                 </DONT>
-                                                 <DO>
-                                                 Before using this argument, always
-                                                 try to make full use of supplying additional
-                                                 contexts via secondary_contexts_items_ids.
-                                                 Only when you repeatedly hit no results,
-                                                 supply a query string.
-                                                 </DO>
-                                                 </STRATEGY>
+                  </SEARCH STRATEGY>"
+    :inputSchema
+    {:type       "object"
+     :properties 
+     {:q 
+      {:type        "string"
+       :description
+       "Query string. 
+       <STRATEGY>
+       <DONT>
+       Don't use this argument reflexively. Instead try
+       provide additional ids via secondary_contexts_items_ids
+       </DONT>
+       <DO>
+       Before using this argument, always
+       try to make full use of supplying additional
+       contexts via secondary_contexts_items_ids.
+       Only when you repeatedly hit no results,
+       supply a query string.
+       </DO>
+       </STRATEGY>
 
-                                                 Before I describe this argument, note that it is often preferential to
-                                                 pre-filter items by using intersection search by passing secondary_contexts_items_ids
-                                                 rather than using an actual search term for q.
+       Before I describe this argument, note that it is often preferential to
+       pre-filter items by using intersection search by passing secondary_contexts_items_ids
+       rather than using an actual search term for q.
                                                  
-                                                 Obviously, when trying to find anything, we need to narrow down the search result, ideally such that 
-                                          the thing we search for is the top search result.
+       Obviously, when trying to find anything, we need to narrow down the search result, ideally such that 
+       the thing we search for is the top search result.
                                                  
-                                          However, when a selected_context is given, you might want to give an empty query string to see all items available and related to a given context.
+       However, when a selected_context is given, you might want to give an empty query string to see all items available and related to a given context.
                                                  
-                                                 An even better strategy within Tracker to filter for good results is to specify secondary-contexts-items-ids to 
-                                                 search in intersections of contexts. This is often better to use query strings."}
-                               :selected_context_item_id 
-                               {:type        "string"
-                                :description "an id number to narrow down the search results to items related to that context.
-                                                when doing intersection searches, use this id for the narrowest/most specific of the contexts."}
-                               :secondary_contexts_items_ids
-                               {:type "array"
-                                :items {:type "string"}
-                                :description "A definitive success strategy in Tracker:
-                                              When doing a get_related_items query that is narrowed down
-                                              by additional contexts, only items are shown which are also part of these other contexts.
+       An even better strategy within Tracker to filter for good results is to specify secondary-contexts-items-ids to 
+       search in intersections of contexts. This is often better to use query strings."}
+      :selected_context_item_id     
+      {:type        "string"
+       :description "an id number to narrow down the search results to items related to that context.
+                     when doing intersection searches, use this id for the narrowest/most specific of the contexts."}
+      :secondary_contexts_items_ids 
+      {:type        "array"
+       :items       {:type "string"}
+       :description "A definitive success strategy in Tracker:
+                     When doing a get_related_items query that is narrowed down
+                     by additional contexts, only items are shown which are also part of these other contexts.
                                               
-                                              When doing intersection searches, make broader and more generic categories  
-                                              be deployed via secondary_contexts_items_ids and reserve selected-context-item-id 
-                                              for the narrowest of the contexts."}}
-                  :required   ["q" "selected_context_item_id"
-                               "secondary_contexts_items_ids"]}}
+                     When doing intersection searches, make broader and more generic categories  
+                     be deployed via secondary_contexts_items_ids and reserve selected-context-item-id 
+                     for the narrowest of the contexts."}}
+     :required   ["q" "selected_context_item_id"
+                  "secondary_contexts_items_ids"]}}
    :get-item-with-description-and-related-items
    {:name "get_item_with_description_and_related_items"
     :description 
@@ -251,14 +265,50 @@
                                {}
                                {:limit 10}))
 
+(defn- blank? [x]
+  (or (nil? x) 
+      (and (string? x) (= "" x))
+      (and (coll? x) (empty? x))))
+
+(defn- convert-item [i item]
+  (let [item (-> item
+                 (assoc :result-rank (inc i))
+                 (dissoc :sort_idx)
+                 (assoc :last-seen (:updated_at (:update_at item)))
+                 (dissoc :updated_at)
+                 ;; probably unnecessary
+                 (dissoc :updated_at_ctx))
+        item (into {} (remove (comp blank? second) item))]
+    (update item :data (fn [data]
+                         (-> data
+                             (dissoc :contexts)
+                             (assoc :items 
+                                    (:contexts data))
+                             (update :items 
+                                     (fn [items] 
+                                       (into {}
+                                             (map (fn [[id item]] 
+                                                    [id (-> item
+                                                            (dissoc :show-badge?))])
+                                                  items)))))))))
+
 (defn get-related-items [{:keys [q selected_context_item_id secondary_contexts_items_ids] :as arguments}]
   (log/info {:arguments arguments} "get-related-items")
-  (search/search-related-items
-   db
-   q
-   selected_context_item_id
-   {:selected-secondary-contexts secondary_contexts_items_ids}
-   {:limit 10}))
+  (let [results (search/search-related-items
+                 db
+                 q
+                 selected_context_item_id
+                 {:selected-secondary-contexts secondary_contexts_items_ids}
+                 {:limit (if (seq secondary_contexts_items_ids)
+                           100
+                           10)})
+        results (map-indexed (fn [i item] 
+                               (convert-item i item)) 
+                             results)]
+    results))
+
+(comment
+  (get-related-items {:selected_context_item_id 10935}))
 
 (defn trim-to [n text]
   (if (> (count text) n)
