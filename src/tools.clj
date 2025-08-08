@@ -261,7 +261,7 @@
   ([i item]
    (let [item (-> item
                   (dissoc :sort_idx)
-                  (assoc :last-seen (:updated_at (:update_at item)))
+                  (assoc :last-looked-at-or-upranked-on (:updated_at (:update_at item)))
                   (dissoc :updated_at)
                   ;; probably unnecessary
                   (dissoc :updated_at_ctx))
