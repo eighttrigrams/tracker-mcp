@@ -305,7 +305,7 @@
   ([item] (convert-item nil item))
   ([i item]
    (let [item (-> item
-                  #_(dissoc :sort_idx) ;; TODO review
+                  #_(dissoc :sort_idx) ;; TODO review, i commented it out for search mode 2 book quotes, but normally dont need it
                   (assoc :last-looked-at-or-upranked-on (:updated_at (:update_at item)))
                   (dissoc :updated_at)
                   ;; probably unnecessary
