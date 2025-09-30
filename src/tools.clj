@@ -14,11 +14,11 @@
                                       "..")
                                     "/tracker/config.edn")))))
 
-(def tools-list 
+(def tools-list
   {:get-contexts
-   {:name "get_contexts"
-    :description 
-    "Tracker is a superhuman memory system which here represent's my (Daniel, the User) memory.
+     {:name "get_contexts",
+      :description
+        "Tracker is a superhuman memory system which here represent's my (Daniel, the User) memory.
      Instead of sending long search strings to this MCP, often one finds things by looking
      them up in the right category, which in Tracker is called \"Context\".
 
@@ -31,25 +31,26 @@
      they might be found in, and then find related items.
 
      \"Contexts\" tend to have shorter titles, non context \"Items\" tend to have longer, 
-     more specific titles (who's titles are unlikely to be matched by any particular search terms \"q\")."
-    :inputSchema
-    {:type       "object"
-     :properties
-     {:q             
-      {:type        "string"
-       :minLength 3
-       :maxLength 15
-       :description "<IMPORTANT>With more than one search term, usually prefer two queries to the tool with each word over one call with a \"q\" comprised of two words.
+     more specific titles (who's titles are unlikely to be matched by any particular search terms \"q\").",
+      :inputSchema
+        {:type "object",
+         :properties
+           {:q
+              {:type "string",
+               :minLength 3,
+               :maxLength 15,
+               :description
+                 "<IMPORTANT>With more than one search term, usually prefer two queries to the tool with each word over one call with a \"q\" comprised of two words.
                      Example. Rather than \"books reading\" issue one call with \"q\" as \"books\", and if that yields nothing, try \"q\" with \"reading\". Keep it short
                      and break search terms down.</IMPORTANT>
                      
                      Query string. Obviously, when trying to find anything, we need to narrow down the search result, ideally such that 
-                     the thing we search for is the top search result. Note that normally we limit the results to 10, so you might not even see any more."}}
-     :required   ["q"]}}
+                     the thing we search for is the top search result. Note that normally we limit the results to 10, so you might not even see any more."}},
+         :required ["q"]}},
    :get-items
-   {:name        "get_items"
-    :description 
-    "@tool get_items
+     {:name "get_items",
+      :description
+        "@tool get_items
      
      <SEARCH STRATEGY>
      <DO>
@@ -94,27 +95,36 @@
      One other important thing, while context items are meant to act as containers
      and entry point for searches, EVERY item has the same property that you
      can get its description via get_item, and find items related to it via
-     get_related_items."
-    :inputSchema {:type       "object"
-                  :properties {:q {:type        "string"
-                                   :minLength 3
-                                   :description "Query string. Obviously, when trying to find anything, we need to narrow down the search result, ideally such that 
-                                          the thing we search for is the top search result. Note that normally we limit the results to 10, so you might not even see any more."}}
-                  :required   ["q"]}}
+     get_related_items.",
+      :inputSchema
+        {:type "object",
+         :properties
+           {:q
+              {:type "string",
+               :minLength 3,
+               :description
+                 "Query string. Obviously, when trying to find anything, we need to narrow down the search result, ideally such that 
+                                          the thing we search for is the top search result. Note that normally we limit the results to 10, so you might not even see any more."}},
+         :required ["q"]}},
    :get-people
-   {:name "get_people"
-    :description "Best way to find specific persons in Tracker
+     {:name "get_people",
+      :description
+        "Best way to find specific persons in Tracker
                   Whenever you know the name of a person and want to know mere
-                  look here first!!!"
-    :inputSchema 
-    {:type       "object"
-     :properties {:q {:type        "string"
-                      :minLength   2
-                      :description "Query string to find a specific person, usually put the name or part of the name of the person you are searching for here."}}
-     :required   ["q"]}}
+                  look here first!!!",
+      :inputSchema
+        {:type "object",
+         :properties
+           {:q
+              {:type "string",
+               :minLength 2,
+               :description
+                 "Query string to find a specific person, usually put the name or part of the name of the person you are searching for here."}},
+         :required ["q"]}},
    :get-related-items
-   {:name        "get_related_items"
-    :description "Asks Tracker about related items to a given context item and lists 
+     {:name "get_related_items",
+      :description
+        "Asks Tracker about related items to a given context item and lists 
                   them in the order
                   most recently touched first (where touched can mean a 
                   modification or just having looked at it).
@@ -154,14 +164,14 @@
                   Avoid doing searches without at least trying intersections
                   using secondary_contexts_items_ids argument.
                   </DONT>
-                  </SEARCH STRATEGY>"
-    :inputSchema
-    {:type       "object"
-     :properties 
-     {:q 
-      {:type        "string"
-       :description
-       "Query string. 
+                  </SEARCH STRATEGY>",
+      :inputSchema
+        {:type "object",
+         :properties
+           {:q
+              {:type "string",
+               :description
+                 "Query string. 
        <STRATEGY>
        <DONT>
        Don't use this argument reflexively. Instead try
@@ -186,27 +196,38 @@
        However, when a selected_context is given, you might want to give an empty query string to see all items available and related to a given context.
                                                  
        An even better strategy within Tracker to filter for good results is to specify secondary-contexts-items-ids to 
-       search in intersections of contexts. This is often better to use query strings."}
-      :selected_context_item_id     
-      {:type        "string"
-       :description "an id number to narrow down the search results to items related to that context.
-                     when doing intersection searches, use this id for the narrowest/most specific of the contexts."}
-      :secondary_contexts_items_ids 
-      {:type        "array"
-       :items       {:type "string"}
-       :description "A definitive success strategy in Tracker:
+       search in intersections of contexts. This is often better to use query strings."},
+            :selected_context_item_id
+              {:type "string",
+               :description
+                 "an id number to narrow down the search results to items related to that context.
+                     when doing intersection searches, use this id for the narrowest/most specific of the contexts."},
+            :secondary_contexts_items_ids
+              {:type "array",
+               :items {:type "string"},
+               :description
+                 "A definitive success strategy in Tracker:
                      When doing a get_related_items query that is narrowed down
                      by additional contexts, only items are shown which are also part of these other contexts.
                                               
                      When doing intersection searches, make broader and more generic categories  
                      be deployed via secondary_contexts_items_ids and reserve selected-context-item-id 
-                     for the narrowest of the contexts."}}
-     :required   ["q" "selected_context_item_id"
-                  "secondary_contexts_items_ids"]}}
+                     for the narrowest of the contexts."},
+            :search_mode
+              {:type "integer",
+               :description
+                 "is usually 0, for showing the most recently touched items towards the top.
+                                                           however, in certain cases, other search modes are interesting. for example
+                                                           search mode 2 lists items according to their sort_idx. the meaning of sort_idx
+                                                           depends on the choice of the user, but for orientation, in the context of a book
+                                                           context, this is likely the page number (of quotes)"}},
+         :required ["q" "selected_context_item_id"
+                    "secondary_contexts_items_ids"
+                    "search_mode"]}},
    :get-item-with-description-and-related-items
-   {:name "get_item_with_description_and_related_items"
-    :description 
-    "When we are dealing with items which are not contexts (i.e. `is_context` is false)
+     {:name "get_item_with_description_and_related_items",
+      :description
+        "When we are dealing with items which are not contexts (i.e. `is_context` is false)
      these are what one could consider leaf nodes which have not the character
      of being a subject, a topic, a collection, a category, or a container.
      
@@ -218,15 +239,27 @@
      case we are interested in getting their description as well as these related items
      at once and prefer that (IMPORTANT!) definitely for those types of items over calls to 
      the \"get_item\" tool.
-     "
-    :inputSchema {:type       "object"
-                  :properties {:id {:type        "string"
-                                    :description "the item's id, as the issues returned from get_items and get_related_items always include."}}
-                  :required   ["id"]}}
-   :get-item 
-   {:name        "get_item"
-    :description 
-    "One thing upfront. For items which are not of context character 
+     ",
+      :inputSchema
+        {:type "object",
+         :properties
+           {:id
+              {:type "string",
+               :description
+                 "the item's id, as the issues returned from get_items and get_related_items always include."},
+            :search_mode
+              {:type "integer",
+               :description
+                 "is usually 0, for showing the most recently touched items towards the top.
+                                                           however, in certain cases, other search modes are interesting. for example
+                                                           search mode 2 lists items according to their sort_idx. the meaning of sort_idx
+                                                           depends on the choice of the user, but for orientation, in the context of a book
+                                                           context, this is likely the page number (of quotes)"}},
+         :required ["id" "search_mode"]}},
+   :get-item
+     {:name "get_item",
+      :description
+        "One thing upfront. For items which are not of context character 
      (like topics, subjects, containers, collections, resources), prefer the 
      \"get_item_with_description_and_related_items\" over calls to \"get_item\" 
      plus \"get_related_items\".
@@ -239,11 +272,15 @@
      Also, once you have an issue that looks interesting, you should definitely
      more often than not also check for its related item, ussing its id,
      using get_related_items and the selected_context_item_id parameter.
-                              "
-    :inputSchema {:type       "object"
-                  :properties {:id {:type        "string"
-                                    :description "the item's id, as the issues returned from get_items and get_related_items always include."}}
-                  :required   ["id"]}}})
+                              ",
+      :inputSchema
+        {:type "object",
+         :properties
+           {:id
+              {:type "string",
+               :description
+                 "the item's id, as the issues returned from get_items and get_related_items always include."}},
+         :required ["id"]}}})
 
 (defn get-contexts [{:keys [q] :as arguments}]
   (log/info {:arguments arguments} "get-contexts")
@@ -296,16 +333,19 @@
                                                          {}
                                                          {:limit 10})))
 
-(defn get-related-items [{:keys [q selected_context_item_id secondary_contexts_items_ids] :as arguments}]
+(defn get-related-items [{:keys [q selected_context_item_id secondary_contexts_items_ids search_mode] :as arguments}]
   (log/info {:arguments arguments} "get-related-items")
   (let [results (search/search-related-items
                  db
                  q
                  selected_context_item_id
-                 {:selected-secondary-contexts secondary_contexts_items_ids}
-                 {:limit (if (seq secondary_contexts_items_ids)
-                           100
-                           10)})
+                 {:selected-secondary-contexts secondary_contexts_items_ids
+                  :search-mode search_mode}
+                 {:limit (if (= 2 search_mode)
+                           5000
+                           (if (seq secondary_contexts_items_ids)
+                               100
+                               10))})
         results (map-indexed convert-item results)]
     results))
 
@@ -323,14 +363,16 @@
                ;; TODO make the & arg-map thing to pass in :id id without specifying map, then check whether arg is id, or title, to replace get-by-title
                              {:id id})))
 
-(defn get-item-with-description-and-related-items [{:keys [id] :as arguments}]
+(defn get-item-with-description-and-related-items [{:keys [id search_mode] :as arguments}]
   (log/info {:arguments arguments} "get-item-with-description-and-related-items")
   (let [item (ds/get-item db {:id id})]
     (when (:is_context item) (throw (UnsupportedOperationException. "Call this only for non is_context items.")))
     {:item-with-description (convert-item item) 
      :related-items (map-indexed 
                      convert-item 
-                     (search/search-related-items db "" (:id item) {:selected-secondary-contexts []} {}))}))
+                     (search/search-related-items db "" (:id item) 
+                                                  {:selected-secondary-contexts []
+                                                   :search-mode search_mode} {}))}))
 
 (defn map-tool [name]
   (case name
