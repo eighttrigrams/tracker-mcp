@@ -301,41 +301,42 @@
   [x]
   (or (nil? x) (and (string? x) (= "" x)) (and (coll? x) (empty? x))))
 
-(defn- convert-item
-  ([item] (convert-item nil item))
-  ([i item]
-   (let [item (-> item
-                  #_(dissoc :sort_idx) ;; TODO review, i commented it out for search mode 2 book quotes, but normally dont need it
-                  (assoc :last-looked-at-or-upranked-on (:updated_at (:update_at item)))
-                  (dissoc :updated_at)
-                  ;; probably unnecessary
-                  (dissoc :updated_at_ctx))
-         item (if i (assoc item :result-rank (inc i)) item)
-         item (into {} (remove (comp blank? second) item))]
-     (update item
-             :data
-             (fn [data]
-               (-> data
-                   (dissoc :contexts)
-                   (assoc :items (:contexts data))
-                   (update :items
-                           (fn [items]
-                             (into {}
-                                   (map (fn [[id item]] [id
-                                                         (-> item
-                                                             (dissoc
-                                                               :show-badge?))])
-                                     items))))))))))
+(defn- convert-item [{:keys [search-mode]}]
+  (fn convert-item'
+    ([item] (convert-item' nil item))
+    ([i item]
+     (let [item (-> item
+                    (assoc :last-looked-at-or-upranked-on (:updated_at (:update_at item)))
+                    (dissoc :updated_at)
+                    ;; probably unnecessary
+                    (dissoc :updated_at_ctx))
+           item (if-not (= 2 search-mode) (dissoc item :sort_idx) item)
+           item (if (and i (not= 2 search-mode)) (assoc item :result-rank (inc i)) item)
+           item (into {} (remove (comp blank? second) item))]
+       (update item
+               :data
+               (fn [data]
+                 (-> data
+                     (dissoc :contexts)
+                     (assoc :items (:contexts data))
+                     (update :items
+                             (fn [items]
+                               (into {}
+                                     (map (fn [[id item]] [id
+                                                           (-> item
+                                                               (dissoc
+                                                                :show-badge?))])
+                                          items)))))))))))
 
 (defn get-items [{:keys [q selected_context_item_id _only_contexts] :as _arguments}]
   (when selected_context_item_id (throw (IllegalArgumentException. "shouldn't pass selected_context_item_id. For this use get-related-items"))) ;; ??
   #_(when (not (or (= "true" only_contexts) (nil? only_contexts))) 
     (throw (IllegalArgumentException. "only contexts should either be \"true\" or nil/null (omit the parameter/argument entirely when it should say anything other than true)")))
-  (map-indexed convert-item (search/search-items db q {:all-items? true} {:limit 10})))
+  (map-indexed (convert-item {}) (search/search-items db q {:all-items? true} {:limit 10})))
 
 (defn get-people [{:keys [q] :as arguments}]
   (log/info {:arguments arguments} "get-people")
-  (map-indexed convert-item (search/search-related-items db 
+  (map-indexed (convert-item {}) (search/search-related-items db 
                                                          q 
                                                          10960
                                                          {}
@@ -354,7 +355,7 @@
                            (if (seq secondary_contexts_items_ids)
                                100
                                10))})
-        results (map-indexed convert-item results)]
+        results (map-indexed (convert-item {:search-mode search_mode}) results)]
     results))
 
 (comment
@@ -367,7 +368,7 @@
 
 (defn get-item [{:keys [id] :as arguments}]
   (log/info {:arguments arguments} "get-item")
-  (convert-item (ds/get-item db 
+  ((convert-item {}) (ds/get-item db 
                ;; TODO make the & arg-map thing to pass in :id id without specifying map, then check whether arg is id, or title, to replace get-by-title
                              {:id id})))
 
@@ -375,9 +376,9 @@
   (log/info {:arguments arguments} "get-item-with-description-and-related-items")
   (let [item (ds/get-item db {:id id})]
     (when (:is_context item) (throw (UnsupportedOperationException. "Call this only for non is_context items.")))
-    {:item-with-description (convert-item item) 
+    {:item-with-description ((convert-item {}) item) 
      :related-items (map-indexed 
-                     convert-item 
+                     (convert-item {:search-mode search_mode}) 
                      (search/search-related-items db "" (:id item) 
                                                   {:selected-secondary-contexts []
                                                    :search-mode search_mode} {}))}))
