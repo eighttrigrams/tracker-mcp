@@ -220,7 +220,9 @@
                                                            however, in certain cases, other search modes are interesting. for example
                                                            search mode 2 lists items according to their sort_idx. the meaning of sort_idx
                                                            depends on the choice of the user, but for orientation, in the context of a book
-                                                           context, this is likely the page number (of quotes)
+                                                           context, this is likely the page number (of quotes). what sort_idx means can also
+                  sometimes be looked up by looking at the description of secondary_contexts_item by which we filter.
+                   
                   
                   search mode 5 lists items by most recently added topmost"}},
          :required ["q" "selected_context_item_id"
@@ -255,7 +257,8 @@
                                                            however, in certain cases, other search modes are interesting. for example
                                                            search mode 2 lists items according to their sort_idx. the meaning of sort_idx
                                                            depends on the choice of the user, but for orientation, in the context of a book
-                                                           context, this is likely the page number (of quotes)
+                                                           context, this is likely the page number (of quotes). what sort_idx means can also
+                  sometimes be looked up by looking at the description of secondary_contexts_item by which we filter.
                   
                   
                   search mode 5 lists items by most recently added topmost
@@ -302,7 +305,7 @@
   ([item] (convert-item nil item))
   ([i item]
    (let [item (-> item
-                  (dissoc :sort_idx)
+                  #_(dissoc :sort_idx) ;; TODO review
                   (assoc :last-looked-at-or-upranked-on (:updated_at (:update_at item)))
                   (dissoc :updated_at)
                   ;; probably unnecessary
