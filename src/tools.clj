@@ -220,10 +220,11 @@
                                                            however, in certain cases, other search modes are interesting. for example
                                                            search mode 2 lists items according to their sort_idx. the meaning of sort_idx
                                                            depends on the choice of the user, but for orientation, in the context of a book
-                                                           context, this is likely the page number (of quotes)"}},
+                                                           context, this is likely the page number (of quotes)
+                  
+                  search mode 5 lists items by most recently added topmost"}},
          :required ["q" "selected_context_item_id"
-                    "secondary_contexts_items_ids"
-                    "search_mode"]}},
+                    "secondary_contexts_items_ids" "search_mode"]}},
    :get-item-with-description-and-related-items
      {:name "get_item_with_description_and_related_items",
       :description
@@ -254,7 +255,11 @@
                                                            however, in certain cases, other search modes are interesting. for example
                                                            search mode 2 lists items according to their sort_idx. the meaning of sort_idx
                                                            depends on the choice of the user, but for orientation, in the context of a book
-                                                           context, this is likely the page number (of quotes)"}},
+                                                           context, this is likely the page number (of quotes)
+                  
+                  
+                  search mode 5 lists items by most recently added topmost
+                  "}},
          :required ["id" "search_mode"]}},
    :get-item
      {:name "get_item",
